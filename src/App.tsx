@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import InstallPWA from "./pages/InstallPWA";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/install" element={<InstallPWA />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

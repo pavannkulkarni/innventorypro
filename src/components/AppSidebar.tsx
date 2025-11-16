@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Package, BarChart3, Settings, Download } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 import {
@@ -18,6 +18,7 @@ const items = [
   { title: "Inventory", url: "/inventory", icon: Package },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Install App", url: "/install", icon: Download },
 ];
 
 export function AppSidebar() {
