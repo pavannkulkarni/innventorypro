@@ -7,13 +7,37 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "24px",
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
       colors: {
+        /* Core neutrals */
+        "bg-100": "hsl(var(--bg-100))",
+        "bg-200": "hsl(var(--bg-200))",
+        "surface-100": "hsl(var(--surface-100))",
+        "surface-200": "hsl(var(--surface-200))",
+        "muted-100": "hsl(var(--muted-100))",
+        divider: "hsl(var(--divider))",
+        
+        "text-primary": "hsl(var(--text-primary))",
+        "text-secondary": "hsl(var(--text-secondary))",
+        "text-faint": "hsl(var(--text-faint))",
+
+        /* Accent colors */
+        "accent-primary": "hsl(var(--accent-primary))",
+        "accent-primary-600": "hsl(var(--accent-primary-600))",
+
+        /* Status colors */
+        "status-success": "hsl(var(--success))",
+        "status-danger": "hsl(var(--danger))",
+        "status-warning": "hsl(var(--warning))",
+        "status-info": "hsl(var(--info))",
+        "neutral-badge": "hsl(var(--neutral-badge))",
+
+        /* Shadcn semantic tokens */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -33,11 +57,15 @@ export default {
         },
         success: {
           DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
+          foreground: "hsl(var(--success-foreground) / 1)",
         },
         warning: {
           DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
+          foreground: "hsl(var(--warning-foreground) / 1)",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground) / 1)",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -55,16 +83,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -74,9 +92,9 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "14px",
+        md: "10px",
+        sm: "6px",
       },
       keyframes: {
         "accordion-down": {

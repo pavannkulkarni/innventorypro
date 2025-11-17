@@ -29,10 +29,10 @@ interface InventoryTableProps {
   onDelete?: (id: string) => void;
 }
 
-function getStatusVariant(quantity: number): "default" | "secondary" | "destructive" {
-  if (quantity === 0) return "destructive";
-  if (quantity < 20) return "secondary";
-  return "default";
+function getStatusVariant(quantity: number): "success" | "warning" | "danger" {
+  if (quantity === 0) return "danger";
+  if (quantity < 20) return "warning";
+  return "success";
 }
 
 function getStatusLabel(quantity: number): string {
