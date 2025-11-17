@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { InventoryTable } from "@/components/InventoryTable";
 import { ProductDialog } from "@/components/ProductDialog";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Inventory() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [userId, setUserId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleEdit = (product: any) => {
     setSelectedProduct(product);
@@ -26,25 +39,27 @@ export default function Inventory() {
     toast.success("Product deleted successfully");
   };
 
-  const handleBarcodeScan = (code: string) => {
+  const handleBarcodeScan = async (code: string) => {
     console.log("Scanned barcode:", code);
-    // In a real app, you would look up the product by barcode
-    // For now, we'll just show a toast and open the add product dialog
-    toast.info(`Looking up product with barcode: ${code}`);
     
-    // Simulate product lookup
-    setTimeout(() => {
-      setSelectedProduct({
-        id: "",
-        name: "",
-        sku: code,
-        category: "",
-        quantity: 0,
-        price: 0,
-      });
-      setScannerOpen(false);
-      setDialogOpen(true);
-    }, 500);
+    // Look up product by barcode
+    const { data: existingProduct } = await supabase
+      .from("products")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("barcode", code)
+      .maybeSingle();
+
+    if (existingProduct) {
+      toast.success(`Found: ${existingProduct.name}`);
+      setSelectedProduct(existingProduct);
+    } else {
+      toast.info("New product - add details");
+      setSelectedProduct({ barcode: code });
+    }
+    
+    setScannerOpen(false);
+    setDialogOpen(true);
   };
 
   return (

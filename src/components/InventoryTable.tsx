@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,48 +11,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
   name: string;
   sku: string;
+  barcode?: string;
   category: string;
   quantity: number;
   price: number;
-  status: "in-stock" | "low-stock" | "out-of-stock";
-}
-
-const mockProducts: Product[] = [
-  { id: "1", name: "Wireless Mouse", sku: "WM-001", category: "Electronics", quantity: 150, price: 29.99, status: "in-stock" },
-  { id: "2", name: "USB-C Cable", sku: "UC-002", category: "Accessories", quantity: 8, price: 12.99, status: "low-stock" },
-  { id: "3", name: "Laptop Stand", sku: "LS-003", category: "Furniture", quantity: 0, price: 45.99, status: "out-of-stock" },
-  { id: "4", name: "Mechanical Keyboard", sku: "MK-004", category: "Electronics", quantity: 75, price: 89.99, status: "in-stock" },
-  { id: "5", name: "Webcam HD", sku: "WC-005", category: "Electronics", quantity: 45, price: 59.99, status: "in-stock" },
-  { id: "6", name: "Desk Lamp", sku: "DL-006", category: "Furniture", quantity: 12, price: 34.99, status: "low-stock" },
-  { id: "7", name: "Monitor 27\"", sku: "MN-007", category: "Electronics", quantity: 28, price: 299.99, status: "in-stock" },
-  { id: "8", name: "Ergonomic Chair", sku: "EC-008", category: "Furniture", quantity: 5, price: 249.99, status: "low-stock" },
-];
-
-function getStatusVariant(status: Product["status"]): "default" | "secondary" | "destructive" {
-  switch (status) {
-    case "in-stock":
-      return "default";
-    case "low-stock":
-      return "secondary";
-    case "out-of-stock":
-      return "destructive";
-  }
-}
-
-function getStatusLabel(status: Product["status"]): string {
-  switch (status) {
-    case "in-stock":
-      return "In Stock";
-    case "low-stock":
-      return "Low Stock";
-    case "out-of-stock":
-      return "Out of Stock";
-  }
 }
 
 interface InventoryTableProps {
@@ -60,15 +29,96 @@ interface InventoryTableProps {
   onDelete?: (id: string) => void;
 }
 
+function getStatusVariant(quantity: number): "default" | "secondary" | "destructive" {
+  if (quantity === 0) return "destructive";
+  if (quantity < 20) return "secondary";
+  return "default";
+}
+
+function getStatusLabel(quantity: number): string {
+  if (quantity === 0) return "Out of Stock";
+  if (quantity < 20) return "Low Stock";
+  return "In Stock";
+}
+
 export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProducts = mockProducts.filter(
+  useEffect(() => {
+    fetchProducts();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        () => {
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchProducts = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast.error("Failed to fetch products");
+      console.error(error);
+    } else {
+      setProducts(data || []);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete product");
+    } else {
+      toast.success("Product deleted successfully");
+      if (onDelete) onDelete(id);
+    }
+  };
+
+  const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -90,6 +140,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
             <TableRow>
               <TableHead>Product Name</TableHead>
               <TableHead>SKU</TableHead>
+              <TableHead>Barcode</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">Price</TableHead>
@@ -98,38 +149,49 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell className="text-right">{product.quantity}</TableCell>
-                <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(product.status)}>
-                    {getStatusLabel(product.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit?.(product)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete?.(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {filteredProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.sku || "-"}</TableCell>
+                  <TableCell>{product.barcode || "-"}</TableCell>
+                  <TableCell>{product.category || "-"}</TableCell>
+                  <TableCell className="text-right">{product.quantity}</TableCell>
+                  <TableCell className="text-right">
+                    ${product.price?.toFixed(2) || "0.00"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusVariant(product.quantity)}>
+                      {getStatusLabel(product.quantity)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit && onEdit(product)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
