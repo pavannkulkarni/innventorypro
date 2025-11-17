@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,42 +17,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: {
-    id?: string;
-    name?: string;
-    description?: string;
-    sku?: string;
-    barcode?: string;
-    category?: string;
-    quantity?: number;
-    price?: number;
-    cost?: number;
-    supplier?: string;
-    location?: string;
-  };
+  product?: any;
 }
 
-export function ProductDialog({ open, onOpenChange, product }: ProductDialogProps) {
+interface SelectOption {
+  id: string;
+  name: string;
+  code?: string;
+  symbol?: string;
+}
+
+export function ProductDialog({
+  open,
+  onOpenChange,
+  product,
+}: ProductDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<SelectOption[]>([]);
+  const [suppliers, setSuppliers] = useState<SelectOption[]>([]);
+  const [warehouses, setWarehouses] = useState<SelectOption[]>([]);
+  const [currencies, setCurrencies] = useState<SelectOption[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     sku: "",
     barcode: "",
-    category: "",
-    quantity: "",
-    price: "",
-    cost: "",
-    supplier: "",
-    location: "",
+    category_id: "",
+    supplier_id: "",
+    warehouse_id: "",
+    currency_id: "",
+    quantity: 0,
+    price: 0,
+    cost: 0,
   });
+
+  useEffect(() => {
+    if (open) {
+      fetchOptions();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (product) {
@@ -61,12 +70,13 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
         description: product.description || "",
         sku: product.sku || "",
         barcode: product.barcode || "",
-        category: product.category || "",
-        quantity: product.quantity?.toString() || "",
-        price: product.price?.toString() || "",
-        cost: product.cost?.toString() || "",
-        supplier: product.supplier || "",
-        location: product.location || "",
+        category_id: product.category_id || "",
+        supplier_id: product.supplier_id || "",
+        warehouse_id: product.warehouse_id || "",
+        currency_id: product.currency_id || "",
+        quantity: product.quantity || 0,
+        price: product.price || 0,
+        cost: product.cost || 0,
       });
     } else {
       setFormData({
@@ -74,44 +84,57 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
         description: "",
         sku: "",
         barcode: "",
-        category: "",
-        quantity: "",
-        price: "",
-        cost: "",
-        supplier: "",
-        location: "",
+        category_id: "",
+        supplier_id: "",
+        warehouse_id: "",
+        currency_id: "",
+        quantity: 0,
+        price: 0,
+        cost: 0,
       });
     }
   }, [product]);
+
+  const fetchOptions = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const [categoriesData, suppliersData, warehousesData, currenciesData] =
+      await Promise.all([
+        supabase.from("categories").select("id, name, code").eq("user_id", session.user.id).eq("is_active", true),
+        supabase.from("suppliers").select("id, name, code").eq("user_id", session.user.id).eq("is_active", true),
+        supabase.from("warehouses").select("id, name, code").eq("user_id", session.user.id).eq("is_active", true),
+        supabase.from("currencies").select("id, name, code, symbol").eq("user_id", session.user.id).eq("is_active", true),
+      ]);
+
+    setCategories(categoriesData.data || []);
+    setSuppliers(suppliersData.data || []);
+    setWarehouses(warehousesData.data || []);
+    setCurrencies(currenciesData.data || []);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error("You must be logged in");
-        return;
-      }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("You must be logged in");
+      setLoading(false);
+      return;
+    }
 
+    try {
       const productData = {
-        name: formData.name,
-        description: formData.description || null,
-        sku: formData.sku || null,
-        barcode: formData.barcode || null,
-        category: formData.category || null,
-        quantity: parseInt(formData.quantity) || 0,
-        price: parseFloat(formData.price) || null,
-        cost: parseFloat(formData.cost) || null,
-        supplier: formData.supplier || null,
-        location: formData.location || null,
+        ...formData,
         user_id: session.user.id,
+        category_id: formData.category_id || null,
+        supplier_id: formData.supplier_id || null,
+        warehouse_id: formData.warehouse_id || null,
+        currency_id: formData.currency_id || null,
       };
 
       if (product?.id) {
-        // Update existing product
         const { error } = await supabase
           .from("products")
           .update(productData)
@@ -120,7 +143,6 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
         if (error) throw error;
         toast.success("Product updated successfully");
       } else {
-        // Create new product
         const { error } = await supabase
           .from("products")
           .insert([productData]);
@@ -131,7 +153,7 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
 
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || "An error occurred");
+      toast.error(error.message || "Failed to save product");
     } finally {
       setLoading(false);
     }
@@ -139,47 +161,27 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {product?.id ? "Edit Product" : "Add New Product"}
+            {product ? "Edit Product" : "Add New Product"}
           </DialogTitle>
-          <DialogDescription>
-            {product?.id
-              ? "Update the product information below."
-              : "Fill in the details to add a new product to your inventory."}
-          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Product Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="Wireless Mouse"
-                required
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Product description..."
-                rows={3}
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Product Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="sku">SKU</Label>
                 <Input
                   id="sku"
@@ -187,10 +189,23 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
                   onChange={(e) =>
                     setFormData({ ...formData, sku: e.target.value })
                   }
-                  placeholder="WM-001"
                 />
               </div>
-              <div className="grid gap-2">
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="barcode">Barcode</Label>
                 <Input
                   id="barcode"
@@ -198,105 +213,158 @@ export function ProductDialog({ open, onOpenChange, product }: ProductDialogProp
                   onChange={(e) =>
                     setFormData({ ...formData, barcode: e.target.value })
                   }
-                  placeholder="123456789"
                 />
               </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, category: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Electronics">Electronics</SelectItem>
-                  <SelectItem value="Accessories">Accessories</SelectItem>
-                  <SelectItem value="Furniture">Furniture</SelectItem>
-                  <SelectItem value="Office Supplies">Office Supplies</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="quantity">Quantity *</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantity: e.target.value })
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category_id: value })
                   }
-                  placeholder="0"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="price">Price</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="cost">Cost</Label>
-                <Input
-                  id="cost"
-                  type="number"
-                  step="0.01"
-                  value={formData.cost}
-                  onChange={(e) =>
-                    setFormData({ ...formData, cost: e.target.value })
-                  }
-                  placeholder="0.00"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
+              <div className="space-y-2">
                 <Label htmlFor="supplier">Supplier</Label>
-                <Input
-                  id="supplier"
-                  value={formData.supplier}
-                  onChange={(e) =>
-                    setFormData({ ...formData, supplier: e.target.value })
+                <Select
+                  value={formData.supplier_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, supplier_id: value })
                   }
-                  placeholder="Supplier name"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((sup) => (
+                      <SelectItem key={sup.id} value={sup.id}>
+                        {sup.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="warehouse">Warehouse</Label>
+                <Select
+                  value={formData.warehouse_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, warehouse_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select warehouse" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {warehouses.map((wh) => (
+                      <SelectItem key={wh.id} value={wh.id}>
+                        {wh.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="0"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      quantity: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  required
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select
+                  value={formData.currency_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, currency_id: value })
                   }
-                  placeholder="Warehouse A, Shelf 5"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((cur) => (
+                      <SelectItem key={cur.id} value={cur.id}>
+                        {cur.symbol} - {cur.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      price: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cost">Cost</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.cost}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      cost: parseFloat(e.target.value) || 0,
+                    })
+                  }
                 />
               </div>
             </div>
           </div>
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : product?.id ? "Update Product" : "Add Product"}
+              {loading ? "Saving..." : product ? "Update" : "Save"}
             </Button>
           </DialogFooter>
         </form>
