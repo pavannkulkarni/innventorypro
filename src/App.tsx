@@ -10,6 +10,10 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
+import Warehouses from "./pages/Warehouses";
+import Suppliers from "./pages/Suppliers";
+import Categories from "./pages/Categories";
+import Currencies from "./pages/Currencies";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import InstallPWA from "./pages/InstallPWA";
@@ -23,7 +27,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -31,7 +34,6 @@ const App = () => {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -60,16 +62,19 @@ const App = () => {
               path="/*"
               element={
                 <ProtectedRoute>
-                  <div className="min-h-screen flex flex-col">
+                  <div className="min-h-screen flex flex-col bg-bg-200">
                     <Header />
                     <main className="flex-1 p-6 container mx-auto">
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/warehouses" element={<Warehouses />} />
+                        <Route path="/suppliers" element={<Suppliers />} />
+                        <Route path="/categories" element={<Categories />} />
+                        <Route path="/currencies" element={<Currencies />} />
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/install" element={<InstallPWA />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </main>
