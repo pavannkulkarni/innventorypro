@@ -19,9 +19,16 @@ interface Product {
   name: string;
   sku: string;
   barcode?: string;
-  category: string;
+  category_id?: string;
+  supplier_id?: string;
+  warehouse_id?: string;
+  currency_id?: string;
   quantity: number;
   price: number;
+  categories?: { name: string };
+  suppliers?: { name: string };
+  warehouses?: { name: string };
+  currencies?: { symbol: string };
 }
 
 interface InventoryTableProps {
@@ -77,7 +84,13 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
 
     const { data, error } = await supabase
       .from("products")
-      .select("*")
+      .select(`
+        *,
+        categories(name),
+        suppliers(name),
+        warehouses(name),
+        currencies(symbol)
+      `)
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
 
@@ -109,7 +122,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category?.toLowerCase().includes(searchTerm.toLowerCase())
+      product.categories?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -140,8 +153,9 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
             <TableRow>
               <TableHead>Product Name</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Barcode</TableHead>
               <TableHead>Category</TableHead>
+              <TableHead>Supplier</TableHead>
+              <TableHead>Warehouse</TableHead>
               <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">Price</TableHead>
               <TableHead>Status</TableHead>
@@ -151,7 +165,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
@@ -160,11 +174,12 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.sku || "-"}</TableCell>
-                  <TableCell>{product.barcode || "-"}</TableCell>
-                  <TableCell>{product.category || "-"}</TableCell>
+                  <TableCell>{product.categories?.name || "-"}</TableCell>
+                  <TableCell>{product.suppliers?.name || "-"}</TableCell>
+                  <TableCell>{product.warehouses?.name || "-"}</TableCell>
                   <TableCell className="text-right">{product.quantity}</TableCell>
                   <TableCell className="text-right">
-                    ${product.price?.toFixed(2) || "0.00"}
+                    {product.currencies?.symbol || "$"}{product.price?.toFixed(2) || "0.00"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(product.quantity)}>

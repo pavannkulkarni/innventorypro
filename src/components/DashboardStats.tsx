@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, AlertCircle, TrendingUp, DollarSign } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StatCardProps {
   title: string;
@@ -26,30 +28,81 @@ function StatCard({ title, value, icon, trend }: StatCardProps) {
 }
 
 export function DashboardStats() {
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    lowStockItems: 0,
+    totalCategories: 0,
+    inventoryValue: 0,
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    // Fetch total products
+    const { count: productsCount } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", session.user.id);
+
+    // Fetch low stock items (quantity < 20)
+    const { count: lowStockCount } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", session.user.id)
+      .lt("quantity", 20);
+
+    // Fetch total categories
+    const { count: categoriesCount } = await supabase
+      .from("categories")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", session.user.id);
+
+    // Fetch inventory value
+    const { data: products } = await supabase
+      .from("products")
+      .select("quantity, price")
+      .eq("user_id", session.user.id);
+
+    const totalValue = products?.reduce(
+      (sum, product) => sum + (product.quantity * (product.price || 0)),
+      0
+    ) || 0;
+
+    setStats({
+      totalProducts: productsCount || 0,
+      lowStockItems: lowStockCount || 0,
+      totalCategories: categoriesCount || 0,
+      inventoryValue: totalValue,
+    });
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total Products"
-        value="1,284"
+        value={stats.totalProducts}
         icon={<Package className="h-4 w-4 text-muted-foreground" />}
-        trend="+12% from last month"
       />
       <StatCard
         title="Low Stock Items"
-        value="23"
+        value={stats.lowStockItems}
         icon={<AlertCircle className="h-4 w-4 text-warning" />}
         trend="Needs attention"
       />
       <StatCard
         title="Total Categories"
-        value="12"
+        value={stats.totalCategories}
         icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
         title="Inventory Value"
-        value="$45,231"
+        value={`$${stats.inventoryValue.toFixed(2)}`}
         icon={<DollarSign className="h-4 w-4 text-success" />}
-        trend="+8% from last month"
       />
     </div>
   );
