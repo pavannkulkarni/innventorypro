@@ -12,6 +12,7 @@ export default function Inventory() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [userId, setUserId] = useState<string>("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -23,6 +24,14 @@ export default function Inventory() {
 
     fetchUser();
   }, []);
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      // Trigger refetch when dialog closes
+      setRefreshKey(prev => prev + 1);
+    }
+  };
 
   const handleEdit = (product: any) => {
     setSelectedProduct(product);
@@ -90,11 +99,11 @@ export default function Inventory() {
         />
       )}
 
-      <InventoryTable onEdit={handleEdit} onDelete={handleDelete} />
+      <InventoryTable key={refreshKey} onEdit={handleEdit} onDelete={handleDelete} />
 
       <ProductDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogClose}
         product={selectedProduct}
       />
     </div>
