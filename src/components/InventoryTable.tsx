@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -10,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2, Search } from "lucide-react";
+import { Pencil, Trash2, Search, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -49,6 +50,7 @@ function getStatusLabel(quantity: number): string {
 }
 
 export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -188,6 +190,14 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/inventory/${product.id}/variants`)}
+                        title="Manage Variants"
+                      >
+                        <Package className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
