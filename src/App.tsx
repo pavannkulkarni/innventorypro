@@ -11,6 +11,7 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
+import ProductVariants from "./pages/ProductVariants";
 import Warehouses from "./pages/Warehouses";
 import Suppliers from "./pages/Suppliers";
 import Categories from "./pages/Categories";
@@ -70,6 +71,7 @@ const App = () => {
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/inventory/:productId/variants" element={<ProductVariants />} />
                         <Route path="/warehouses" element={<Warehouses />} />
                         <Route path="/suppliers" element={<Suppliers />} />
                         <Route path="/categories" element={<Categories />} />
