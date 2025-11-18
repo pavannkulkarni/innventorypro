@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,28 +12,28 @@ Based on enterprise admin dashboard specifications.
 
 @layer base {
   :root {
-    /* Core neutrals - Dark theme foundation */
-    --bg-100: 0 0% 6%;        /* #0f0f0f - app background */
-    --bg-200: 0 0% 6.3%;      /* #101010 - main page background */
-    --surface-100: 0 0% 9.4%;  /* #181818 - primary cards/panels */
-    --surface-200: 0 0% 14.1%; /* #242424 - secondary panels */
-    --muted-100: 0 0% 17.6%;   /* #2b2d2e - subtle panels/row hover */
-    --divider: 0 0% 16.5%;     /* #2a2a2a - thin separators */
+    /* Light mode colors */
+    --bg-100: 0 0% 100%;
+    --bg-200: 0 0% 98%;
+    --surface-100: 0 0% 100%;
+    --surface-200: 0 0% 96%;
+    --muted-100: 0 0% 94%;
+    --divider: 0 0% 90%;
     
-    --text-primary: 0 0% 91%;     /* #e8e8e8 - primary UI text */
-    --text-secondary: 0 0% 74.1%; /* #bdbdbd - secondary text */
-    --text-faint: 0 0% 60.4%;     /* #9a9a9a - disabled/placeholder */
+    --text-primary: 0 0% 9%;
+    --text-secondary: 0 0% 39%;
+    --text-faint: 0 0% 59%;
 
     /* Primary accent - Blue for actions, links, active states */
-    --accent-primary: 207 100% 60%;      /* #3396ff - primary actions */
-    --accent-primary-600: 207 88% 51%;   /* #1b7cea - hover/strong */
+    --accent-primary: 207 100% 60%;
+    --accent-primary-600: 207 88% 51%;
     
     /* Status colors - Semantic states */
-    --success: 156 45% 47%;      /* #41ac7b - green chip/success */
-    --danger: 4 76% 61%;         /* #e65c51 - red chip/negative */
-    --warning: 38 86% 64%;       /* #f2b654 - yellow chip/warning */
-    --info: 210 83% 58%;         /* #3d94ef - info chip/secondary */
-    --neutral-badge: 0 0% 42.7%; /* #6d6d6d - neutral label */
+    --success: 156 45% 47%;
+    --danger: 4 76% 61%;
+    --warning: 38 86% 64%;
+    --info: 210 83% 58%;
+    --neutral-badge: 0 0% 42.7%;
 
     /* Shadcn semantic mappings to design system */
     --background: var(--bg-200);
@@ -70,6 +72,49 @@ Based on enterprise admin dashboard specifications.
     --chart-3: var(--warning);
     --chart-4: var(--danger);
     --chart-5: 280 80% 60%;
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --bg-100: 0 0% 6%;
+    --bg-200: 0 0% 6.3%;
+    --surface-100: 0 0% 9.4%;
+    --surface-200: 0 0% 14.1%;
+    --muted-100: 0 0% 17.6%;
+    --divider: 0 0% 16.5%;
+    
+    --text-primary: 0 0% 91%;
+    --text-secondary: 0 0% 74.1%;
+    --text-faint: 0 0% 60.4%;
+
+    /* Shadcn semantic mappings to design system */
+    --background: var(--bg-200);
+    --foreground: var(--text-primary);
+    
+    --card: var(--surface-100);
+    --card-foreground: var(--text-primary);
+    
+    --popover: var(--surface-100);
+    --popover-foreground: var(--text-primary);
+    
+    --primary: var(--accent-primary);
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: var(--surface-200);
+    --secondary-foreground: var(--text-primary);
+    
+    --muted: var(--muted-100);
+    --muted-foreground: var(--text-secondary);
+    
+    --accent: var(--accent-primary);
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: var(--danger);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: var(--divider);
+    --input: var(--surface-200);
+    --ring: var(--accent-primary);
   }
 }
 
