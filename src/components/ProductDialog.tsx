@@ -55,6 +55,7 @@ export function ProductDialog({
     quantity: 0,
     price: 0,
     cost: 0,
+    reorder_level: 0,
   });
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export function ProductDialog({
         quantity: product.quantity || 0,
         price: product.price || 0,
         cost: product.cost || 0,
+        reorder_level: product.reorder_level || 0,
       });
     } else {
       setFormData({
@@ -91,6 +93,7 @@ export function ProductDialog({
         quantity: 0,
         price: 0,
         cost: 0,
+        reorder_level: 0,
       });
     }
   }, [product]);
@@ -319,7 +322,7 @@ export function ProductDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Price</Label>
                 <Input
@@ -348,6 +351,21 @@ export function ProductDialog({
                     setFormData({
                       ...formData,
                       cost: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reorder_level">Reorder Level</Label>
+                <Input
+                  id="reorder_level"
+                  type="number"
+                  min="0"
+                  value={formData.reorder_level}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      reorder_level: parseInt(e.target.value) || 0,
                     })
                   }
                 />
