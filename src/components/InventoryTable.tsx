@@ -193,7 +193,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate(`/inventory/${product.id}/variants`)}
+                        onClick={() => navigate(`/product-master/${product.id}/variants`)}
                         title="Manage Variants"
                       >
                         <Package className="h-4 w-4" />

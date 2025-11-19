@@ -109,6 +109,7 @@ export type Database = {
           price: number | null
           product_id: string
           quantity: number
+          reorder_level: number | null
           sku: string | null
           updated_at: string
           user_id: string
@@ -124,6 +125,7 @@ export type Database = {
           price?: number | null
           product_id: string
           quantity?: number
+          reorder_level?: number | null
           sku?: string | null
           updated_at?: string
           user_id: string
@@ -139,6 +141,7 @@ export type Database = {
           price?: number | null
           product_id?: string
           quantity?: number
+          reorder_level?: number | null
           sku?: string | null
           updated_at?: string
           user_id?: string
@@ -165,6 +168,7 @@ export type Database = {
           name: string
           price: number | null
           quantity: number
+          reorder_level: number | null
           sku: string | null
           supplier_id: string | null
           updated_at: string
@@ -182,6 +186,7 @@ export type Database = {
           name: string
           price?: number | null
           quantity?: number
+          reorder_level?: number | null
           sku?: string | null
           supplier_id?: string | null
           updated_at?: string
@@ -199,6 +204,7 @@ export type Database = {
           name?: string
           price?: number | null
           quantity?: number
+          reorder_level?: number | null
           sku?: string | null
           supplier_id?: string | null
           updated_at?: string
@@ -269,6 +275,73 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          reference_number: string | null
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+          warehouse_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          reference_number?: string | null
+          transaction_date?: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id: string
+          variant_id?: string | null
+          warehouse_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          reference_number?: string | null
+          transaction_date?: string
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id?: string
+          variant_id?: string | null
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {
@@ -359,7 +432,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      transaction_type:
+        | "OPENING_STOCK"
+        | "PURCHASE"
+        | "SALE"
+        | "RETURN"
+        | "ADJUSTMENT"
+        | "TRANSFER_IN"
+        | "TRANSFER_OUT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -486,6 +566,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      transaction_type: [
+        "OPENING_STOCK",
+        "PURCHASE",
+        "SALE",
+        "RETURN",
+        "ADJUSTMENT",
+        "TRANSFER_IN",
+        "TRANSFER_OUT",
+      ],
+    },
   },
 } as const

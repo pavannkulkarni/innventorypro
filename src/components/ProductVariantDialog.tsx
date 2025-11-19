@@ -47,6 +47,7 @@ export function ProductVariantDialog({
     quantity: 0,
     price: 0,
     cost: 0,
+    reorder_level: 0,
     is_active: true,
     attributes: {} as Record<string, string>,
   });
@@ -62,6 +63,7 @@ export function ProductVariantDialog({
         quantity: variant.quantity || 0,
         price: variant.price || 0,
         cost: variant.cost || 0,
+        reorder_level: variant.reorder_level || 0,
         is_active: variant.is_active ?? true,
         attributes: variant.attributes || {},
       });
@@ -73,6 +75,7 @@ export function ProductVariantDialog({
         quantity: 0,
         price: 0,
         cost: 0,
+        reorder_level: 0,
         is_active: true,
         attributes: {},
       });
@@ -221,7 +224,7 @@ export function ProductVariantDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="variant-quantity">Quantity *</Label>
                 <Input
@@ -258,6 +261,18 @@ export function ProductVariantDialog({
                   value={formData.cost}
                   onChange={(e) =>
                     setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="variant-reorder-level">Reorder Level</Label>
+                <Input
+                  id="variant-reorder-level"
+                  type="number"
+                  min="0"
+                  value={formData.reorder_level}
+                  onChange={(e) =>
+                    setFormData({ ...formData, reorder_level: parseInt(e.target.value) || 0 })
                   }
                 />
               </div>

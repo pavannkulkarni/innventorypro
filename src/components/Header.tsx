@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, LayoutDashboard, Package, Warehouse, Users, FolderTree, DollarSign, BarChart3, Settings, Moon, Sun } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Package, Warehouse, Users, FolderTree, DollarSign, BarChart3, Settings, Moon, Sun, Archive, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -42,12 +42,28 @@ export default function Header() {
             Dashboard
           </NavLink>
           <NavLink
-            to="/inventory"
+            to="/product-master"
             className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50"
             activeClassName="bg-muted text-primary"
           >
             <Package className="h-4 w-4 inline-block mr-2" />
-            Inventory
+            Product Master
+          </NavLink>
+          <NavLink
+            to="/stock-movements"
+            className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50"
+            activeClassName="bg-muted text-primary"
+          >
+            <TrendingUp className="h-4 w-4 inline-block mr-2" />
+            Stock Movements
+          </NavLink>
+          <NavLink
+            to="/inventory"
+            className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50"
+            activeClassName="bg-muted text-primary"
+          >
+            <Archive className="h-4 w-4 inline-block mr-2" />
+            Inventory View
           </NavLink>
           <NavLink
             to="/warehouses"

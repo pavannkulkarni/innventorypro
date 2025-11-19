@@ -10,7 +10,9 @@ import { ThemeProvider } from "next-themes";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import Inventory from "./pages/Inventory";
+import ProductMaster from "./pages/ProductMaster";
+import StockMovements from "./pages/StockMovements";
+import InventoryView from "./pages/InventoryView";
 import ProductVariants from "./pages/ProductVariants";
 import Warehouses from "./pages/Warehouses";
 import Suppliers from "./pages/Suppliers";
@@ -70,8 +72,10 @@ const App = () => {
                     <main className="flex-1 p-6 container mx-auto">
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/inventory" element={<Inventory />} />
-                        <Route path="/inventory/:productId/variants" element={<ProductVariants />} />
+                        <Route path="/product-master" element={<ProductMaster />} />
+                        <Route path="/product-master/:productId/variants" element={<ProductVariants />} />
+                        <Route path="/stock-movements" element={<StockMovements />} />
+                        <Route path="/inventory" element={<InventoryView />} />
                         <Route path="/warehouses" element={<Warehouses />} />
                         <Route path="/suppliers" element={<Suppliers />} />
                         <Route path="/categories" element={<Categories />} />
