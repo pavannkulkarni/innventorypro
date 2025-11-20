@@ -9,6 +9,7 @@ import { Session } from "@supabase/supabase-js";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
+import { GlobalSearch } from "./components/GlobalSearch";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ProductMaster from "./pages/ProductMaster";
@@ -76,26 +77,7 @@ const App = () => {
                             <SidebarTrigger className="-ml-2" />
                             
                             <div className="flex-1 max-w-2xl mx-auto">
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  placeholder="Search products, variants, warehouses..."
-                                  className="w-full h-10 px-4 pl-10 bg-surface-100 border border-divider rounded-lg text-sm text-text-primary placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary transition-all"
-                                />
-                                <svg
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                  />
-                                </svg>
-                              </div>
+                              <GlobalSearch />
                             </div>
 
                             <div className="flex items-center gap-2">
