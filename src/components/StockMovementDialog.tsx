@@ -44,6 +44,7 @@ interface StockMovementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   movement?: any;
+  scannedProduct?: any;
   onSuccess?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function StockMovementDialog({
   open,
   onOpenChange,
   movement,
+  scannedProduct,
   onSuccess,
 }: StockMovementDialogProps) {
   const [loading, setLoading] = useState(false);
@@ -88,6 +90,17 @@ export function StockMovementDialog({
           ? new Date(movement.transaction_date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
       });
+    } else if (scannedProduct) {
+      setFormData({
+        product_id: scannedProduct.id || "",
+        variant_id: "",
+        warehouse_id: "",
+        transaction_type: "PURCHASE",
+        quantity: 1,
+        reference_number: "",
+        notes: "",
+        transaction_date: new Date().toISOString().split("T")[0],
+      });
     } else {
       setFormData({
         product_id: "",
@@ -100,7 +113,7 @@ export function StockMovementDialog({
         transaction_date: new Date().toISOString().split("T")[0],
       });
     }
-  }, [movement, open]);
+  }, [movement, scannedProduct, open]);
 
   useEffect(() => {
     if (formData.product_id) {
