@@ -12,6 +12,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import logo from "@/assets/logo.svg";
 
 import {
   Sidebar,
@@ -51,12 +52,10 @@ export function AppSidebar() {
     <Sidebar className="border-r border-divider bg-surface-200">
       <SidebarHeader className="h-16 px-6 border-b border-divider flex items-center">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-accent-primary/10 flex items-center justify-center">
-            <Package className="h-5 w-5 text-accent-primary" />
-          </div>
+          <img src={logo} alt="InnoventoryPro Logo" className="h-10 w-10" />
           {open && (
             <div>
-              <h2 className="text-lg font-semibold text-text-primary">Inventory Pro</h2>
+              <h2 className="text-lg font-semibold text-text-primary">InnoventoryPro</h2>
               <p className="text-xs text-text-secondary">Manage your stock</p>
             </div>
           )}
