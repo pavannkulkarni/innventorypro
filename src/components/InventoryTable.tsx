@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Search, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface Product {
   id: string;
@@ -54,6 +55,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchProducts();
@@ -158,7 +160,6 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
               <TableHead>Category</TableHead>
               <TableHead>Supplier</TableHead>
               <TableHead>Warehouse</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
               <TableHead className="text-right">Price</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -167,7 +168,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
@@ -179,9 +180,8 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
                   <TableCell>{product.categories?.name || "-"}</TableCell>
                   <TableCell>{product.suppliers?.name || "-"}</TableCell>
                   <TableCell>{product.warehouses?.name || "-"}</TableCell>
-                  <TableCell className="text-right">{product.quantity}</TableCell>
                   <TableCell className="text-right">
-                    {product.currencies?.symbol || "$"}{product.price?.toFixed(2) || "0.00"}
+                    {formatPrice(product.price, product.currencies?.symbol)}
                   </TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(product.quantity)}>

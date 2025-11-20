@@ -28,12 +28,12 @@ import {
 
 const inventoryItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Product Master", url: "/product-master", icon: Package },
-  { title: "Stock Movements", url: "/stock-movements", icon: TrendingUp },
   { title: "Inventory View", url: "/inventory", icon: Archive },
+  { title: "Stock Movements", url: "/stock-movements", icon: TrendingUp },
 ];
 
 const configItems = [
+  { title: "Product Master", url: "/product-master", icon: Package },
   { title: "Warehouses", url: "/warehouses", icon: Warehouse },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "Categories", url: "/categories", icon: FolderTree },
