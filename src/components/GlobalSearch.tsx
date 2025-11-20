@@ -224,7 +224,7 @@ export function GlobalSearch() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setIsOpen(true)}
-          className="pl-10 bg-surface-100 border-divider"
+          className="pl-10 bg-surface-100 border-divider text-sm h-9"
         />
       </div>
 
