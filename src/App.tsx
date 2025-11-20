@@ -72,8 +72,69 @@ const App = () => {
                       <div className="min-h-screen flex w-full bg-bg-200">
                         <AppSidebar />
                         <div className="flex-1 flex flex-col">
-                          <header className="h-14 border-b border-divider bg-surface-200 flex items-center px-6">
+                          <header className="h-16 border-b border-divider bg-surface-200 flex items-center px-6 gap-4">
                             <SidebarTrigger className="-ml-2" />
+                            
+                            <div className="flex-1 max-w-2xl mx-auto">
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="Search products, variants, warehouses..."
+                                  className="w-full h-10 px-4 pl-10 bg-surface-100 border border-divider rounded-lg text-sm text-text-primary placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-accent-primary/20 focus:border-accent-primary transition-all"
+                                />
+                                <svg
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  const theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                                  document.documentElement.classList.toggle('dark');
+                                }}
+                                className="h-9 w-9 rounded-lg hover:bg-muted-100 flex items-center justify-center transition-colors"
+                              >
+                                <svg className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <svg className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                              </button>
+
+                              <div className="h-6 w-px bg-divider" />
+
+                              <div className="flex items-center gap-2">
+                                <div className="h-9 w-9 rounded-full bg-accent-primary/10 flex items-center justify-center">
+                                  <svg className="h-4 w-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                </div>
+                                <button
+                                  onClick={async () => {
+                                    await supabase.auth.signOut();
+                                  }}
+                                  className="h-9 w-9 rounded-lg hover:bg-muted-100 flex items-center justify-center transition-colors"
+                                  title="Sign out"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
                           </header>
                           <main className="flex-1 p-6 overflow-auto">
                             <div className="container mx-auto">
