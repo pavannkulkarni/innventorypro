@@ -49,7 +49,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-divider bg-surface-200">
-      <SidebarHeader className="px-6 py-6 border-b border-divider">
+      <SidebarHeader className="h-16 px-6 border-b border-divider flex items-center">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-accent-primary/10 flex items-center justify-center">
             <Package className="h-5 w-5 text-accent-primary" />
