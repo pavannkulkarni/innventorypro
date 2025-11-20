@@ -19,6 +19,18 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const productSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
+  sku: z.string().trim().max(100, "SKU must be less than 100 characters").optional().or(z.literal("")),
+  barcode: z.string().trim().max(100, "Barcode must be less than 100 characters").optional().or(z.literal("")),
+  description: z.string().trim().max(1000, "Description must be less than 1000 characters").optional().or(z.literal("")),
+  quantity: z.number().int("Quantity must be a whole number").min(0, "Quantity cannot be negative"),
+  price: z.number().min(0, "Price cannot be negative").optional(),
+  cost: z.number().min(0, "Cost cannot be negative").optional(),
+  reorder_level: z.number().int("Reorder level must be a whole number").min(0, "Reorder level cannot be negative"),
+});
 
 interface ProductDialogProps {
   open: boolean;
@@ -128,13 +140,32 @@ export function ProductDialog({
     }
 
     try {
+      // Validate form data
+      const validatedData = productSchema.parse({
+        name: formData.name,
+        sku: formData.sku || "",
+        barcode: formData.barcode || "",
+        description: formData.description || "",
+        quantity: Number(formData.quantity),
+        price: formData.price ? Number(formData.price) : undefined,
+        cost: formData.cost ? Number(formData.cost) : undefined,
+        reorder_level: Number(formData.reorder_level),
+      });
+
       const productData = {
-        ...formData,
-        user_id: session.user.id,
+        name: validatedData.name,
+        description: validatedData.description || null,
+        sku: validatedData.sku || null,
+        barcode: validatedData.barcode || null,
         category_id: formData.category_id || null,
         supplier_id: formData.supplier_id || null,
         warehouse_id: formData.warehouse_id || null,
         currency_id: formData.currency_id || null,
+        quantity: validatedData.quantity,
+        price: validatedData.price || null,
+        cost: validatedData.cost || null,
+        reorder_level: validatedData.reorder_level,
+        user_id: session.user.id,
       };
 
       if (product?.id) {
@@ -156,7 +187,12 @@ export function ProductDialog({
 
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || "Failed to save product");
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        toast.error(firstError.message);
+      } else {
+        toast.error(error.message || "Failed to save product");
+      }
     } finally {
       setLoading(false);
     }
