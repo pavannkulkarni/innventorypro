@@ -3,21 +3,24 @@ import { DashboardStats } from "@/components/DashboardStats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
-interface Product {
+interface InventoryItem {
   id: string;
   name: string;
   sku: string;
+  warehouse: string;
   quantity: number;
-  price: number;
-  created_at: string;
-  categories?: { name: string };
-  warehouses?: { name: string };
+  cost?: number;
+  price?: number;
+  reorderLevel?: number;
+  created_at?: string;
 }
 
 export default function Dashboard() {
-  const [lowStockItems, setLowStockItems] = useState<Product[]>([]);
-  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const { formatPrice } = useCurrency();
+  const [lowStockItems, setLowStockItems] = useState<InventoryItem[]>([]);
+  const [recentProducts, setRecentProducts] = useState<InventoryItem[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -27,33 +30,98 @@ export default function Dashboard() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    // Fetch low stock items
-    const { data: lowStock } = await supabase
+    // Fetch all products with their cost and reorder level
+    const { data: products } = await supabase
       .from("products")
+      .select("id, name, sku, cost, reorder_level")
+      .eq("user_id", session.user.id);
+
+    // Fetch all variants with their cost and reorder level
+    const { data: variants } = await supabase
+      .from("product_variants")
+      .select("id, product_id, name, sku, cost, reorder_level")
+      .eq("user_id", session.user.id);
+
+    // Fetch all stock movements
+    const { data: movements } = await supabase
+      .from("stock_movements")
       .select(`
-        *,
-        categories(name),
+        product_id,
+        variant_id,
+        warehouse_id,
+        transaction_type,
+        quantity,
+        created_at,
         warehouses(name)
       `)
       .eq("user_id", session.user.id)
-      .lt("quantity", 20)
-      .order("quantity", { ascending: true })
-      .limit(5);
+      .order("created_at", { ascending: false });
 
-    // Fetch recently added products
-    const { data: recent } = await supabase
-      .from("products")
-      .select(`
-        *,
-        categories(name),
-        warehouses(name)
-      `)
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false })
-      .limit(5);
+    // Calculate inventory per product/variant/warehouse
+    const inventoryMap = new Map<string, any>();
 
-    setLowStockItems(lowStock || []);
-    setRecentProducts(recent || []);
+    movements?.forEach((movement: any) => {
+      const key = `${movement.product_id}-${movement.variant_id || "null"}-${movement.warehouse_id}`;
+      
+      if (!inventoryMap.has(key)) {
+        const product = products?.find((p) => p.id === movement.product_id);
+        const variant = variants?.find((v) => v.id === movement.variant_id);
+        
+        inventoryMap.set(key, {
+          id: key,
+          name: variant?.name || product?.name || "",
+          sku: variant?.sku || product?.sku || "",
+          warehouse: movement.warehouses?.name || "",
+          quantity: 0,
+          cost: variant?.cost || product?.cost || 0,
+          reorderLevel: variant?.reorder_level || product?.reorder_level || 0,
+          lastMovement: movement.created_at,
+        });
+      }
+
+      const item = inventoryMap.get(key)!;
+      const inTypes = ["OPENING_STOCK", "PURCHASE", "RETURN", "TRANSFER_IN"];
+      
+      if (inTypes.includes(movement.transaction_type)) {
+        item.quantity += movement.quantity;
+      } else {
+        item.quantity -= movement.quantity;
+      }
+    });
+
+    const allItems = Array.from(inventoryMap.values());
+    
+    // Get low stock items (quantity <= reorder level or out of stock)
+    const lowStock = allItems
+      .filter(item => item.quantity <= item.reorderLevel)
+      .sort((a, b) => a.quantity - b.quantity)
+      .slice(0, 5);
+
+    // Get recent stock movements (unique products from latest movements)
+    const recentMovementsMap = new Map();
+    movements?.forEach((movement: any) => {
+      const product = products?.find((p) => p.id === movement.product_id);
+      const variant = variants?.find((v) => v.id === movement.variant_id);
+      const key = movement.product_id + (movement.variant_id || "");
+      
+      if (!recentMovementsMap.has(key) && recentMovementsMap.size < 5) {
+        const invKey = `${movement.product_id}-${movement.variant_id || "null"}-${movement.warehouse_id}`;
+        const invItem = inventoryMap.get(invKey);
+        
+        recentMovementsMap.set(key, {
+          id: key,
+          name: variant?.name || product?.name || "",
+          sku: variant?.sku || product?.sku || "",
+          warehouse: movement.warehouses?.name || "",
+          quantity: invItem?.quantity || 0,
+          price: invItem?.cost || 0,
+          created_at: movement.created_at,
+        });
+      }
+    });
+
+    setLowStockItems(lowStock);
+    setRecentProducts(Array.from(recentMovementsMap.values()));
   };
 
   return (
@@ -85,7 +153,7 @@ export default function Dashboard() {
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{item.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.sku} • {item.warehouses?.name || "No warehouse"}
+                        {item.sku} • {item.warehouse}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -102,7 +170,7 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recently Added Products</CardTitle>
+            <CardTitle>Recent Stock Movements</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -117,14 +185,14 @@ export default function Dashboard() {
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{product.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {product.categories?.name || "No category"} • {product.sku}
+                        {product.warehouse} • {product.sku}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <p className="text-sm font-medium">{product.quantity} units</p>
                         <p className="text-xs text-muted-foreground">
-                          ${product.price?.toFixed(2) || "0.00"}
+                          {formatPrice(product.price || 0)}
                         </p>
                       </div>
                     </div>
