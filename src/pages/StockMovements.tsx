@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { StockMovementDialog } from "@/components/StockMovementDialog";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { Plus, Search, Pencil, Trash2, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -22,6 +23,8 @@ export default function StockMovements() {
   const [movements, setMovements] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState<any>(null);
 
   useEffect(() => {
     fetchMovements();
@@ -84,7 +87,30 @@ export default function StockMovements() {
 
   const handleAddNew = () => {
     setSelectedMovement(null);
+    setScannedProduct(null);
     setDialogOpen(true);
+  };
+
+  const handleBarcodeScan = async (code: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: product } = await supabase
+      .from("products")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .eq("barcode", code)
+      .maybeSingle();
+
+    if (product) {
+      toast.success(`Found: ${product.name}`);
+      setScannedProduct(product);
+      setScannerOpen(false);
+      setDialogOpen(true);
+    } else {
+      toast.error("Product not found with this barcode");
+      setScannerOpen(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -134,11 +160,24 @@ export default function StockMovements() {
             Track all inventory transactions and movements
           </p>
         </div>
-        <Button onClick={handleAddNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Record Movement
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setScannerOpen(!scannerOpen)}>
+            <ScanLine className="mr-2 h-4 w-4" />
+            Scan Barcode
+          </Button>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Record Movement
+          </Button>
+        </div>
       </div>
+
+      {scannerOpen && (
+        <BarcodeScanner 
+          onScan={handleBarcodeScan} 
+          onClose={() => setScannerOpen(false)} 
+        />
+      )}
 
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -235,6 +274,7 @@ export default function StockMovements() {
         open={dialogOpen}
         onOpenChange={handleDialogClose}
         movement={selectedMovement}
+        scannedProduct={scannedProduct}
         onSuccess={fetchMovements}
       />
     </div>
