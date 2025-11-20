@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -54,21 +53,32 @@ export default function Settings() {
 
   const loadUserProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // Get session directly from local storage (faster than getUser)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setLoading(false);
+        return;
+      }
 
+      // Fetch profile data
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
-        .single();
+        .eq("id", session.user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
 
       if (profile) {
         profileForm.reset({
           full_name: profile.full_name || "",
-          email: profile.email || user.email || "",
+          email: profile.email || session.user.email || "",
+        });
+      } else {
+        // Fallback to session user data if profile doesn't exist
+        profileForm.reset({
+          full_name: session.user.user_metadata?.full_name || "",
+          email: session.user.email || "",
         });
       }
     } catch (error) {
@@ -86,15 +96,15 @@ export default function Settings() {
   const onProfileSubmit = async (data: ProfileFormData) => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("No user found");
 
       const { error } = await supabase
         .from("profiles")
         .update({
           full_name: data.full_name,
         })
-        .eq("id", user.id);
+        .eq("id", session.user.id);
 
       if (error) throw error;
 
