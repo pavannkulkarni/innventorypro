@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface InventoryItem {
   product_id: string;
@@ -33,6 +34,7 @@ export default function InventoryView() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchInventory();
@@ -230,10 +232,10 @@ export default function InventoryView() {
                         {item.quantity_on_hand}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${item.cost_per_unit.toFixed(2)}
+                        {formatPrice(item.cost_per_unit)}
                       </TableCell>
                       <TableCell className="text-right font-semibold">
-                        ${item.inventory_value.toFixed(2)}
+                        {formatPrice(item.inventory_value)}
                       </TableCell>
                       <TableCell className="text-right">
                         {item.reorder_level}
