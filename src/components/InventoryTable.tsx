@@ -60,7 +60,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
   useEffect(() => {
     fetchProducts();
 
-    // Subscribe to realtime changes
+    // Subscribe to realtime changes for products
     const channel = supabase
       .channel('products-changes')
       .on(
@@ -76,8 +76,25 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
       )
       .subscribe();
 
+    // Also listen to stock movements for real-time inventory updates
+    const movementsChannel = supabase
+      .channel('stock-movements-inventory')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'stock_movements'
+        },
+        () => {
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(movementsChannel);
     };
   }, []);
 
@@ -86,7 +103,7 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
     
     if (!session) return;
 
-    const { data, error } = await supabase
+    const { data: productsData, error } = await supabase
       .from("products")
       .select(`
         *,
@@ -101,9 +118,38 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
     if (error) {
       toast.error("Failed to fetch products");
       console.error(error);
-    } else {
-      setProducts(data || []);
+      setLoading(false);
+      return;
     }
+
+    // Fetch stock movements to calculate actual inventory quantities
+    const { data: movements } = await supabase
+      .from("stock_movements")
+      .select("product_id, transaction_type, quantity")
+      .eq("user_id", session.user.id)
+      .in("product_id", productsData?.map(p => p.id) || []);
+
+    // Calculate actual quantity on hand for each product from stock movements
+    const inventoryMap = new Map<string, number>();
+    
+    movements?.forEach((movement: any) => {
+      const currentQty = inventoryMap.get(movement.product_id) || 0;
+      const inTypes = ["OPENING_STOCK", "PURCHASE", "RETURN", "TRANSFER_IN"];
+      
+      if (inTypes.includes(movement.transaction_type)) {
+        inventoryMap.set(movement.product_id, currentQty + movement.quantity);
+      } else {
+        inventoryMap.set(movement.product_id, currentQty - movement.quantity);
+      }
+    });
+
+    // Update products with actual inventory quantities from stock movements
+    const productsWithInventory = productsData?.map(product => ({
+      ...product,
+      quantity: inventoryMap.get(product.id) || 0
+    })) || [];
+
+    setProducts(productsWithInventory);
     setLoading(false);
   };
 
