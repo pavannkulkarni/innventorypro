@@ -10,24 +10,12 @@ import {
   Users,
   FolderTree,
   DollarSign,
-  LogOut,
-  Moon,
-  Sun,
-  User
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -63,14 +51,6 @@ const systemItems = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully");
-    navigate("/auth");
-  };
 
   return (
     <Sidebar className="border-r border-divider bg-surface-200">
@@ -186,48 +166,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="p-4 border-t border-divider">
-        <div className="flex items-center gap-2 mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex-1 h-9"
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            {open && <span className="ml-2 text-sm">Toggle theme</span>}
-          </Button>
-        </div>
-        
-        <Separator className="mb-3" />
-        
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border-2 border-divider">
-            <AvatarFallback className="bg-accent-primary/10 text-accent-primary font-medium">
-              <User className="h-4 w-4" />
-            </AvatarFallback>
-          </Avatar>
-          
-          {open && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">User</p>
-              <p className="text-xs text-text-secondary truncate">Inventory Manager</p>
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSignOut}
-            className="h-9 w-9 flex-shrink-0"
-            title="Sign out"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }
