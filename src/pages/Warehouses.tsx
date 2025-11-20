@@ -10,10 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Upload, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WarehouseDialog } from "@/components/WarehouseDialog";
+import { ImportDialog } from "@/components/ImportDialog";
+import { exportToCSV } from "@/lib/exportUtils";
 
 interface Warehouse {
   id: string;
@@ -22,6 +24,9 @@ interface Warehouse {
   location: string;
   description: string;
   is_active: boolean;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function Warehouses() {
@@ -29,6 +34,7 @@ export default function Warehouses() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
 
   useEffect(() => {
@@ -97,6 +103,40 @@ export default function Warehouses() {
     setDialogOpen(true);
   };
 
+  const handleImport = async (data: any[]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const warehousesToInsert = data.map((item) => ({
+      name: item.name || item.Name,
+      code: item.code || item.Code,
+      location: item.location || item.Location || null,
+      description: item.description || item.Description || null,
+      is_active: item.is_active !== undefined ? item.is_active : (item.Is_Active !== undefined ? item.Is_Active : true),
+      user_id: session.user.id,
+    }));
+
+    const { error } = await supabase.from("warehouses").insert(warehousesToInsert);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const handleExport = () => {
+    if (warehouses.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    exportToCSV(
+      warehouses.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),
+      "warehouses",
+      ["name", "code", "location", "description", "is_active"]
+    );
+    toast.success("Warehouses exported successfully");
+  };
+
   const filteredWarehouses = warehouses.filter(
     (warehouse) =>
       warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,10 +161,20 @@ export default function Warehouses() {
             Manage your warehouse locations
           </p>
         </div>
-        <Button onClick={handleAddNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Warehouse
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Warehouse
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -201,6 +251,15 @@ export default function Warehouses() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         warehouse={selectedWarehouse}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImport}
+        title="Import Warehouses"
+        description="Upload an Excel, CSV, or JSON file with warehouse data"
+        templateFields={["name", "code", "location", "description", "is_active"]}
       />
     </div>
   );

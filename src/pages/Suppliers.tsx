@@ -10,10 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Upload, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupplierDialog } from "@/components/SupplierDialog";
+import { ImportDialog } from "@/components/ImportDialog";
+import { exportToCSV } from "@/lib/exportUtils";
 
 interface Supplier {
   id: string;
@@ -24,6 +26,9 @@ interface Supplier {
   phone: string;
   address: string;
   is_active: boolean;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function Suppliers() {
@@ -31,6 +36,7 @@ export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
   useEffect(() => {
@@ -99,6 +105,43 @@ export default function Suppliers() {
     setDialogOpen(true);
   };
 
+  const handleImport = async (data: any[]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const suppliersToInsert = data.map((item) => ({
+      name: item.name || item.Name,
+      code: item.code || item.Code,
+      contact_person: item.contact_person || item.Contact_Person || null,
+      email: item.email || item.Email || null,
+      phone: item.phone || item.Phone || null,
+      address: item.address || item.Address || null,
+      description: item.description || item.Description || null,
+      is_active: item.is_active !== undefined ? item.is_active : (item.Is_Active !== undefined ? item.Is_Active : true),
+      user_id: session.user.id,
+    }));
+
+    const { error } = await supabase.from("suppliers").insert(suppliersToInsert);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const handleExport = () => {
+    if (suppliers.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    exportToCSV(
+      suppliers.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),
+      "suppliers",
+      ["name", "code", "contact_person", "email", "phone", "address", "description", "is_active"]
+    );
+    toast.success("Suppliers exported successfully");
+  };
+
   const filteredSuppliers = suppliers.filter(
     (supplier) =>
       supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,10 +167,20 @@ export default function Suppliers() {
             Manage your supplier relationships
           </p>
         </div>
-        <Button onClick={handleAddNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Supplier
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Supplier
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -206,6 +259,15 @@ export default function Suppliers() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         supplier={selectedSupplier}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImport}
+        title="Import Suppliers"
+        description="Upload an Excel, CSV, or JSON file with supplier data"
+        templateFields={["name", "code", "contact_person", "email", "phone", "address", "description", "is_active"]}
       />
     </div>
   );

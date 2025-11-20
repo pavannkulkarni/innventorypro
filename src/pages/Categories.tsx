@@ -10,10 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Upload, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CategoryDialog } from "@/components/CategoryDialog";
+import { ImportDialog } from "@/components/ImportDialog";
+import { exportToCSV } from "@/lib/exportUtils";
 
 interface Category {
   id: string;
@@ -22,6 +24,9 @@ interface Category {
   description: string;
   is_active: boolean;
   parent_id: string | null;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function Categories() {
@@ -29,6 +34,7 @@ export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   useEffect(() => {
@@ -97,6 +103,40 @@ export default function Categories() {
     setDialogOpen(true);
   };
 
+  const handleImport = async (data: any[]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const categoriesToInsert = data.map((item) => ({
+      name: item.name || item.Name,
+      code: item.code || item.Code,
+      description: item.description || item.Description || null,
+      parent_id: item.parent_id || item.Parent_ID || null,
+      is_active: item.is_active !== undefined ? item.is_active : (item.Is_Active !== undefined ? item.Is_Active : true),
+      user_id: session.user.id,
+    }));
+
+    const { error } = await supabase.from("categories").insert(categoriesToInsert);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const handleExport = () => {
+    if (categories.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    exportToCSV(
+      categories.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),
+      "categories",
+      ["name", "code", "description", "parent_id", "is_active"]
+    );
+    toast.success("Categories exported successfully");
+  };
+
   const filteredCategories = categories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,10 +161,20 @@ export default function Categories() {
             Organize your products by category
           </p>
         </div>
-        <Button onClick={handleAddNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Category
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -199,6 +249,15 @@ export default function Categories() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         category={selectedCategory}
+      />
+
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImport}
+        title="Import Categories"
+        description="Upload an Excel, CSV, or JSON file with category data"
+        templateFields={["name", "code", "description", "parent_id", "is_active"]}
       />
     </div>
   );
