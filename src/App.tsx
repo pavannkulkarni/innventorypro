@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { ThemeProvider } from "next-themes";
-import Header from "./components/Header";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./components/AppSidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ProductMaster from "./pages/ProductMaster";
@@ -61,37 +62,46 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={session ? <Navigate to="/" replace /> : <Auth />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <div className="min-h-screen flex flex-col bg-bg-200">
-                    <Header />
-                    <main className="flex-1 p-6 container mx-auto">
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/product-master" element={<ProductMaster />} />
-                        <Route path="/product-master/:productId/variants" element={<ProductVariants />} />
-                        <Route path="/stock-movements" element={<StockMovements />} />
-                        <Route path="/inventory" element={<InventoryView />} />
-                        <Route path="/warehouses" element={<Warehouses />} />
-                        <Route path="/suppliers" element={<Suppliers />} />
-                        <Route path="/categories" element={<Categories />} />
-                        <Route path="/currencies" element={<Currencies />} />
-                        <Route path="/analytics" element={<Analytics />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/install" element={<InstallPWA />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </main>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={session ? <Navigate to="/" replace /> : <Auth />} />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <SidebarProvider defaultOpen={true}>
+                      <div className="min-h-screen flex w-full bg-bg-200">
+                        <AppSidebar />
+                        <div className="flex-1 flex flex-col">
+                          <header className="h-14 border-b border-divider bg-surface-200 flex items-center px-6">
+                            <SidebarTrigger className="-ml-2" />
+                          </header>
+                          <main className="flex-1 p-6 overflow-auto">
+                            <div className="container mx-auto">
+                              <Routes>
+                                <Route path="/" element={<Dashboard />} />
+                                <Route path="/product-master" element={<ProductMaster />} />
+                                <Route path="/product-master/:productId/variants" element={<ProductVariants />} />
+                                <Route path="/stock-movements" element={<StockMovements />} />
+                                <Route path="/inventory" element={<InventoryView />} />
+                                <Route path="/warehouses" element={<Warehouses />} />
+                                <Route path="/suppliers" element={<Suppliers />} />
+                                <Route path="/categories" element={<Categories />} />
+                                <Route path="/currencies" element={<Currencies />} />
+                                <Route path="/analytics" element={<Analytics />} />
+                                <Route path="/settings" element={<Settings />} />
+                                <Route path="/install" element={<InstallPWA />} />
+                                <Route path="*" element={<NotFound />} />
+                              </Routes>
+                            </div>
+                          </main>
+                        </div>
+                      </div>
+                    </SidebarProvider>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
