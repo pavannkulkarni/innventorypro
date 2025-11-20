@@ -71,21 +71,23 @@ export default function ProductMaster() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Product Master</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Product Master</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Master registry for all products and variants
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setScannerOpen(!scannerOpen)}>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={() => setScannerOpen(!scannerOpen)} className="flex-1 sm:flex-none">
             <ScanLine className="mr-2 h-4 w-4" />
-            Scan Barcode
+            <span className="hidden sm:inline">Scan Barcode</span>
+            <span className="sm:hidden">Scan</span>
           </Button>
-          <Button onClick={handleAddNew}>
+          <Button onClick={handleAddNew} className="flex-1 sm:flex-none">
             <Plus className="mr-2 h-4 w-4" />
-            Add Product
+            <span className="hidden sm:inline">Add Product</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>

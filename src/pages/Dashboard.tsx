@@ -127,37 +127,37 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Welcome to your inventory overview
         </p>
       </div>
 
       <DashboardStats />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle>Low Stock Items</CardTitle>
+            <CardTitle className="text-base md:text-lg">Low Stock Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 max-h-80 overflow-y-auto">
               {lowStockItems.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No low stock items</p>
               ) : (
                 lowStockItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between border-b border-divider pb-3 last:border-0 last:pb-0"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-divider pb-3 last:border-0 last:pb-0"
                   >
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{item.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {item.sku} • {item.warehouse}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={item.quantity === 0 ? "danger" : "warning"}>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <Badge variant={item.quantity === 0 ? "danger" : "warning"} className="text-xs">
                         {item.quantity} units
                       </Badge>
                     </div>
@@ -168,27 +168,27 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle>Recent Stock Movements</CardTitle>
+            <CardTitle className="text-base md:text-lg">Recent Stock Movements</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 max-h-80 overflow-y-auto">
               {recentProducts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No products yet</p>
               ) : (
                 recentProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="flex items-center justify-between border-b border-divider pb-3 last:border-0 last:pb-0"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-divider pb-3 last:border-0 last:pb-0"
                   >
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{product.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {product.warehouse} • {product.sku}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <div className="text-right">
                         <p className="text-sm font-medium">{product.quantity} units</p>
                         <p className="text-xs text-muted-foreground">

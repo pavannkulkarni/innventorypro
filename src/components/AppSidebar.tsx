@@ -12,6 +12,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 
 import {
@@ -51,7 +52,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-divider bg-surface-200">
       <SidebarHeader className="h-16 px-6 border-b border-divider flex items-center">
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src={logo} alt="InnoventoryPro Logo" className="h-10 w-10" />
           {open && (
             <div>
@@ -59,7 +60,7 @@ export function AppSidebar() {
               <p className="text-xs text-text-secondary">Manage your stock</p>
             </div>
           )}
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-4">

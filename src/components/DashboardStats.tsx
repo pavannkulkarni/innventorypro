@@ -13,15 +13,15 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, trend }: StatCardProps) {
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
+        <CardTitle className="text-sm font-medium truncate">{title}</CardTitle>
+        <div className="flex-shrink-0">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-xl md:text-2xl font-bold break-words">{value}</div>
         {trend && (
-          <p className="text-xs text-muted-foreground mt-1">{trend}</p>
+          <p className="text-xs text-muted-foreground mt-1 truncate">{trend}</p>
         )}
       </CardContent>
     </Card>
@@ -125,7 +125,7 @@ export function DashboardStats() {
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Stock Items"
         value={stats.totalProducts}
