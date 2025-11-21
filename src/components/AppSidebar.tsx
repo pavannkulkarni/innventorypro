@@ -28,20 +28,20 @@ import {
 } from "@/components/ui/sidebar";
 
 const inventoryItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Inventory View", url: "/inventory", icon: Archive },
-  { title: "Stock Movements", url: "/stock-movements", icon: TrendingUp },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" },
+  { title: "Inventory View", url: "/inventory", icon: Archive, color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" },
+  { title: "Stock Movements", url: "/stock-movements", icon: TrendingUp, color: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400" },
 ];
 
 const configItems = [
-  { title: "Product Master", url: "/product-master", icon: Package },
-  { title: "Warehouses", url: "/warehouses", icon: Warehouse },
-  { title: "Suppliers", url: "/suppliers", icon: Users },
-  { title: "Categories", url: "/categories", icon: FolderTree },
+  { title: "Product Master", url: "/product-master", icon: Package, color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" },
+  { title: "Warehouses", url: "/warehouses", icon: Warehouse, color: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400" },
+  { title: "Suppliers", url: "/suppliers", icon: Users, color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400" },
+  { title: "Categories", url: "/categories", icon: FolderTree, color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400" },
 ];
 
 const insightsItems = [
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Analytics", url: "/analytics", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400" },
 ];
 
 export function AppSidebar() {
@@ -63,7 +63,7 @@ export function AppSidebar() {
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup className="mb-6">
-          <SidebarGroupLabel className="px-3 text-xs font-medium text-text-secondary mb-2">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
             Inventory
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -74,11 +74,13 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-muted-100 hover:text-text-primary transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
                       activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {open && <span className="text-sm">{item.title}</span>}
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${item.color}`}>
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                      </div>
+                      {open && <span className="text-sm font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -88,7 +90,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mb-6">
-          <SidebarGroupLabel className="px-3 text-xs font-medium text-text-secondary mb-2">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
             Configuration
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -98,11 +100,13 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-muted-100 hover:text-text-primary transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
                       activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {open && <span className="text-sm">{item.title}</span>}
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${item.color}`}>
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                      </div>
+                      {open && <span className="text-sm font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -112,7 +116,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="px-3 text-xs font-medium text-text-secondary mb-2">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
             Insights
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -122,11 +126,13 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-muted-100 hover:text-text-primary transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
                       activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {open && <span className="text-sm">{item.title}</span>}
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${item.color}`}>
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                      </div>
+                      {open && <span className="text-sm font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
