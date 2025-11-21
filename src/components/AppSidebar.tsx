@@ -9,7 +9,6 @@ import {
   Warehouse,
   Users,
   FolderTree,
-  DollarSign,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
@@ -39,7 +38,6 @@ const configItems = [
   { title: "Warehouses", url: "/warehouses", icon: Warehouse },
   { title: "Suppliers", url: "/suppliers", icon: Users },
   { title: "Categories", url: "/categories", icon: FolderTree },
-  { title: "Currencies", url: "/currencies", icon: DollarSign },
 ];
 
 const insightsItems = [
