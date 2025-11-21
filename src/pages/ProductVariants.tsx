@@ -179,7 +179,7 @@ export default function ProductVariants() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/inventory")}
+              onClick={() => navigate("/product-master")}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
