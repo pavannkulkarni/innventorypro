@@ -15,6 +15,7 @@ import { Search, Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProductVariantDialog } from "@/components/ProductVariantDialog";
+import { useCurrency } from "@/hooks/useCurrency";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +47,7 @@ interface Product {
 export default function ProductVariants() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
   const [searchTerm, setSearchTerm] = useState("");
   const [variants, setVariants] = useState<Variant[]>([]);
   const [product, setProduct] = useState<Product | null>(null);
@@ -253,10 +255,10 @@ export default function ProductVariants() {
                     </TableCell>
                     <TableCell className="text-right">{variant.quantity}</TableCell>
                     <TableCell className="text-right">
-                      {variant.price ? `$${variant.price.toFixed(2)}` : "-"}
+                      {formatPrice(variant.price)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {variant.cost ? `$${variant.cost.toFixed(2)}` : "-"}
+                      {formatPrice(variant.cost)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={variant.is_active ? "success" : "neutral"}>
