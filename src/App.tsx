@@ -10,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { GlobalSearch } from "./components/GlobalSearch";
+import { NotificationBell } from "./components/NotificationBell";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ProductMaster from "./pages/ProductMaster";
@@ -80,6 +81,8 @@ const App = () => {
                             </div>
 
                             <div className="flex items-center gap-2">
+                              <NotificationBell />
+
                               <button
                                 onClick={() => {
                                   const theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
