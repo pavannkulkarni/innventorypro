@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -108,6 +109,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
+          
           <Button
             variant="ghost"
             size="icon"
