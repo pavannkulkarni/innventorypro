@@ -45,9 +45,9 @@ export function ProductVariantDialog({
     sku: "",
     barcode: "",
     quantity: 0,
-    price: 0,
-    cost: 0,
-    reorder_level: 0,
+    price: "",
+    cost: "",
+    reorder_level: "",
     is_active: true,
     attributes: {} as Record<string, string>,
   });
@@ -61,9 +61,9 @@ export function ProductVariantDialog({
         sku: variant.sku || "",
         barcode: variant.barcode || "",
         quantity: variant.quantity || 0,
-        price: variant.price || 0,
-        cost: variant.cost || 0,
-        reorder_level: variant.reorder_level || 0,
+        price: variant.price !== null && variant.price !== undefined ? variant.price : "",
+        cost: variant.cost !== null && variant.cost !== undefined ? variant.cost : "",
+        reorder_level: variant.reorder_level !== null && variant.reorder_level !== undefined ? variant.reorder_level : "",
         is_active: variant.is_active ?? true,
         attributes: variant.attributes || {},
       });
@@ -73,9 +73,9 @@ export function ProductVariantDialog({
         sku: "",
         barcode: "",
         quantity: 0,
-        price: 0,
-        cost: 0,
-        reorder_level: 0,
+        price: "",
+        cost: "",
+        reorder_level: "",
         is_active: true,
         attributes: {},
       });
@@ -127,8 +127,8 @@ export function ProductVariantDialog({
         sku: formData.sku || undefined,
         barcode: formData.barcode || undefined,
         quantity: formData.quantity,
-        price: formData.price || undefined,
-        cost: formData.cost || undefined,
+        price: formData.price !== "" ? Number(formData.price) : undefined,
+        cost: formData.cost !== "" ? Number(formData.cost) : undefined,
         attributes: Object.keys(formData.attributes).length > 0 ? formData.attributes : undefined,
       });
 
@@ -247,8 +247,9 @@ export function ProductVariantDialog({
                   min="0"
                   value={formData.price}
                   onChange={(e) =>
-                    setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+                    setFormData({ ...formData, price: e.target.value })
                   }
+                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
@@ -260,8 +261,9 @@ export function ProductVariantDialog({
                   min="0"
                   value={formData.cost}
                   onChange={(e) =>
-                    setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })
+                    setFormData({ ...formData, cost: e.target.value })
                   }
+                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
@@ -272,8 +274,9 @@ export function ProductVariantDialog({
                   min="0"
                   value={formData.reorder_level}
                   onChange={(e) =>
-                    setFormData({ ...formData, reorder_level: parseInt(e.target.value) || 0 })
+                    setFormData({ ...formData, reorder_level: e.target.value })
                   }
+                  placeholder="0"
                 />
               </div>
             </div>
