@@ -23,9 +23,9 @@ Based on enterprise admin dashboard specifications.
     --muted-100: 0 0% 94%;
     --divider: 0 0% 90%;
 
-    --text-primary: 0 0% 9%;
-    --text-secondary: 0 0% 39%;
-    --text-faint: 0 0% 59%;
+    --text-primary: 0 0% 13%;
+    --text-secondary: 0 0% 25%;
+    --text-faint: 0 0% 45%;
 
     /* Primary accent - Blue for actions, links, active states */
     --accent-primary: 207 100% 60%;
