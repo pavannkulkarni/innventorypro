@@ -9,10 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { StockMovementDialog } from "@/components/StockMovementDialog";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
-import { Plus, Search, Pencil, Trash2, ScanLine } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ScanLine, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -22,6 +29,7 @@ export default function StockMovements() {
   const [selectedMovement, setSelectedMovement] = useState<any>(null);
   const [movements, setMovements] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<any>(null);
@@ -136,11 +144,19 @@ export default function StockMovements() {
   };
 
   const filteredMovements = movements.filter(
-    (movement) =>
-      movement.products?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movement.product_variants?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movement.reference_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      movement.transaction_type?.toLowerCase().includes(searchTerm.toLowerCase())
+    (movement) => {
+      const matchesSearch =
+        movement.products?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        movement.product_variants?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        movement.reference_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        movement.transaction_type?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesType =
+        transactionTypeFilter === "all" ||
+        movement.transaction_type === transactionTypeFilter;
+      
+      return matchesSearch && matchesType;
+    }
   );
 
   if (loading) {
@@ -180,7 +196,7 @@ export default function StockMovements() {
       )}
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -190,6 +206,22 @@ export default function StockMovements() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <Select value={transactionTypeFilter} onValueChange={setTransactionTypeFilter}>
+            <SelectTrigger className="w-[200px]">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="OPENING_STOCK">Opening Stock</SelectItem>
+              <SelectItem value="PURCHASE">Purchase</SelectItem>
+              <SelectItem value="SALE">Sale</SelectItem>
+              <SelectItem value="RETURN">Return</SelectItem>
+              <SelectItem value="ADJUSTMENT">Adjustment</SelectItem>
+              <SelectItem value="TRANSFER_IN">Transfer In</SelectItem>
+              <SelectItem value="TRANSFER_OUT">Transfer Out</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="rounded-md border">
