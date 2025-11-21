@@ -91,14 +91,6 @@ export default function Header() {
             Categories
           </NavLink>
           <NavLink
-            to="/currencies"
-            className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50"
-            activeClassName="bg-muted text-primary"
-          >
-            <DollarSign className="h-4 w-4 inline-block mr-2" />
-            Currencies
-          </NavLink>
-          <NavLink
             to="/analytics"
             className="px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted/50"
             activeClassName="bg-muted text-primary"
