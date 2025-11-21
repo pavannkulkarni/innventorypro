@@ -22,6 +22,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { useCurrency } from "@/hooks/useCurrency";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const poSchema = z.object({
   supplier_id: z.string().min(1, "Supplier is required"),
@@ -379,14 +384,38 @@ export function PurchaseOrderDialog({
 
             <div className="space-y-2">
               <Label htmlFor="expected_delivery_date">Expected Delivery Date</Label>
-              <Input
-                id="expected_delivery_date"
-                type="date"
-                value={formData.expected_delivery_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, expected_delivery_date: e.target.value })
-                }
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.expected_delivery_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.expected_delivery_date ? (
+                      format(new Date(formData.expected_delivery_date), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.expected_delivery_date ? new Date(formData.expected_delivery_date) : undefined}
+                    onSelect={(date) =>
+                      setFormData({ 
+                        ...formData, 
+                        expected_delivery_date: date ? format(date, "yyyy-MM-dd") : "" 
+                      })
+                    }
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-4">
