@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -15,7 +16,9 @@ import { Search, Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProductVariantDialog } from "@/components/ProductVariantDialog";
+import { BulkEditDialog } from "@/components/BulkEditDialog";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +59,18 @@ export default function ProductVariants() {
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [variantToDelete, setVariantToDelete] = useState<string | null>(null);
+  const [bulkEditDialogOpen, setBulkEditDialogOpen] = useState(false);
+  
+  const {
+    selectedIds,
+    selectedCount,
+    toggleSelection,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+  } = useBulkSelection(variants);
 
   useEffect(() => {
     if (productId) {
@@ -163,6 +178,19 @@ export default function ProductVariants() {
       variant.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    clearSelection();
+  }, [searchTerm, clearSelection]);
+
+  const handleBulkEdit = () => {
+    setBulkEditDialogOpen(true);
+  };
+
+  const handleBulkEditSuccess = () => {
+    fetchVariants();
+    clearSelection();
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center p-8">
@@ -210,12 +238,41 @@ export default function ProductVariants() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          {selectedCount > 0 && (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {selectedCount} selected
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkEdit}
+              >
+                Bulk Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSelection}
+              >
+                Clear
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="rounded-[var(--border-radius-md)] border border-divider bg-surface-100 shadow-elevation-1">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={toggleAll}
+                    aria-label="Select all"
+                    className={isSomeSelected ? "opacity-50" : ""}
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Barcode</TableHead>
@@ -230,13 +287,20 @@ export default function ProductVariants() {
             <TableBody>
               {filteredVariants.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     No variants found. Add your first variant to get started.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredVariants.map((variant) => (
                   <TableRow key={variant.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={isSelected(variant.id)}
+                        onCheckedChange={() => toggleSelection(variant.id)}
+                        aria-label={`Select ${variant.name}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{variant.name}</TableCell>
                     <TableCell>{variant.sku || "-"}</TableCell>
                     <TableCell>{variant.barcode || "-"}</TableCell>
@@ -315,6 +379,14 @@ export default function ProductVariants() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <BulkEditDialog
+        open={bulkEditDialogOpen}
+        onOpenChange={setBulkEditDialogOpen}
+        selectedIds={selectedIds}
+        itemType="variants"
+        onSuccess={handleBulkEditSuccess}
+      />
     </div>
   );
 }
