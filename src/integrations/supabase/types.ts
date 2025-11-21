@@ -312,6 +312,189 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_order_approvals: {
+        Row: {
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string
+          id: string
+          purchase_order_id: string
+          status: Database["public"]["Enums"]["approval_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          purchase_order_id: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          purchase_order_id?: string
+          status?: Database["public"]["Enums"]["approval_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_approvals_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          line_total: number | null
+          notes: string | null
+          product_id: string
+          purchase_order_id: string
+          quantity: number
+          received_quantity: number
+          unit_price: number
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          line_total?: number | null
+          notes?: string | null
+          product_id: string
+          purchase_order_id: string
+          quantity: number
+          received_quantity?: number
+          unit_price: number
+          updated_at?: string
+          user_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          line_total?: number | null
+          notes?: string | null
+          product_id?: string
+          purchase_order_id?: string
+          quantity?: number
+          received_quantity?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string
+          expected_delivery_date: string | null
+          id: string
+          notes: string | null
+          order_date: string
+          po_number: string
+          received_at: string | null
+          status: Database["public"]["Enums"]["po_status"]
+          supplier_id: string
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+          warehouse_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by: string
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          po_number: string
+          received_at?: string | null
+          status?: Database["public"]["Enums"]["po_status"]
+          supplier_id: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+          warehouse_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          po_number?: string
+          received_at?: string | null
+          status?: Database["public"]["Enums"]["po_status"]
+          supplier_id?: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -466,8 +649,18 @@ export type Database = {
     }
     Functions: {
       check_low_stock_notifications: { Args: never; Returns: undefined }
+      generate_po_number: { Args: never; Returns: string }
     }
     Enums: {
+      approval_status: "PENDING" | "APPROVED" | "REJECTED"
+      po_status:
+        | "DRAFT"
+        | "PENDING_APPROVAL"
+        | "APPROVED"
+        | "REJECTED"
+        | "PARTIALLY_RECEIVED"
+        | "RECEIVED"
+        | "CANCELLED"
       transaction_type:
         | "OPENING_STOCK"
         | "PURCHASE"
@@ -603,6 +796,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      approval_status: ["PENDING", "APPROVED", "REJECTED"],
+      po_status: [
+        "DRAFT",
+        "PENDING_APPROVAL",
+        "APPROVED",
+        "REJECTED",
+        "PARTIALLY_RECEIVED",
+        "RECEIVED",
+        "CANCELLED",
+      ],
       transaction_type: [
         "OPENING_STOCK",
         "PURCHASE",

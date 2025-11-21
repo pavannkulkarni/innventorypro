@@ -9,6 +9,7 @@ import {
   Warehouse,
   Users,
   FolderTree,
+  ShoppingCart,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
@@ -35,6 +36,7 @@ const inventoryItems = [
 
 const configItems = [
   { title: "Product Master", url: "/product-master", icon: Package, color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" },
+  { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
   { title: "Warehouses", url: "/warehouses", icon: Warehouse, color: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400" },
   { title: "Suppliers", url: "/suppliers", icon: Users, color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400" },
   { title: "Categories", url: "/categories", icon: FolderTree, color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400" },

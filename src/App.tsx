@@ -20,6 +20,7 @@ import ProductVariants from "./pages/ProductVariants";
 import Warehouses from "./pages/Warehouses";
 import Suppliers from "./pages/Suppliers";
 import Categories from "./pages/Categories";
+import PurchaseOrders from "./pages/PurchaseOrders";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import InstallPWA from "./pages/InstallPWA";
@@ -156,6 +157,7 @@ const App = () => {
                                 <Route path="/warehouses" element={<Warehouses />} />
                                 <Route path="/suppliers" element={<Suppliers />} />
                                 <Route path="/categories" element={<Categories />} />
+                                <Route path="/purchase-orders" element={<PurchaseOrders />} />
                                 <Route path="/analytics" element={<Analytics />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/install" element={<InstallPWA />} />
