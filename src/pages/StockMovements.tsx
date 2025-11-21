@@ -16,13 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { StockMovementDialog } from "@/components/StockMovementDialog";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
-import { Plus, Search, Pencil, Trash2, ScanLine, Filter } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ScanLine, Filter, CalendarIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
 export default function StockMovements() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -30,6 +38,7 @@ export default function StockMovements() {
   const [movements, setMovements] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [loading, setLoading] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<any>(null);
@@ -155,7 +164,13 @@ export default function StockMovements() {
         transactionTypeFilter === "all" ||
         movement.transaction_type === transactionTypeFilter;
       
-      return matchesSearch && matchesType;
+      const movementDate = new Date(movement.transaction_date);
+      const matchesDateRange =
+        !dateRange?.from ||
+        !dateRange?.to ||
+        (movementDate >= dateRange.from && movementDate <= dateRange.to);
+      
+      return matchesSearch && matchesType && matchesDateRange;
     }
   );
 
@@ -222,6 +237,52 @@ export default function StockMovements() {
               <SelectItem value="TRANSFER_OUT">Transfer Out</SelectItem>
             </SelectContent>
           </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[280px] justify-start text-left font-normal",
+                  !dateRange && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "LLL dd, y")} -{" "}
+                      {format(dateRange.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date range</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={2}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+          {dateRange?.from && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDateRange(undefined)}
+              title="Clear date filter"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         <div className="rounded-md border">
