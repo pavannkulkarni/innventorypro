@@ -10,6 +10,7 @@ import {
   Users,
   FolderTree,
   ShoppingCart,
+  CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
@@ -36,6 +37,7 @@ const inventoryItems = [
 
 const purchaseItems = [
   { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
+  { title: "Point of Sale", url: "/pos", icon: CreditCard, color: "bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" },
 ];
 
 const configItems = [
