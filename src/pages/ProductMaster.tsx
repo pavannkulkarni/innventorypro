@@ -4,6 +4,7 @@ import { InventoryTable } from "@/components/InventoryTable";
 import { ProductDialog } from "@/components/ProductDialog";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { ImportDialog } from "@/components/ImportDialog";
+import { BulkEditDialog } from "@/components/BulkEditDialog";
 import { Plus, ScanLine, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,8 @@ export default function ProductMaster() {
   const [userId, setUserId] = useState<string>("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [bulkEditDialogOpen, setBulkEditDialogOpen] = useState(false);
+  const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -162,6 +165,16 @@ export default function ProductMaster() {
     setDialogOpen(true);
   };
 
+  const handleBulkEdit = (selectedIds: Set<string>) => {
+    setBulkSelectedIds(selectedIds);
+    setBulkEditDialogOpen(true);
+  };
+
+  const handleBulkEditSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+    setBulkSelectedIds(new Set());
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -200,7 +213,12 @@ export default function ProductMaster() {
         />
       )}
 
-      <InventoryTable key={refreshKey} onEdit={handleEdit} onDelete={handleDelete} />
+      <InventoryTable 
+        key={refreshKey} 
+        onEdit={handleEdit} 
+        onDelete={handleDelete}
+        onBulkEdit={handleBulkEdit}
+      />
 
       <ProductDialog
         open={dialogOpen}
@@ -215,6 +233,14 @@ export default function ProductMaster() {
         title="Import Products"
         description="Upload an Excel, CSV, or JSON file to import products"
         templateFields={["name", "sku", "barcode", "description", "quantity", "price", "cost", "reorder_level"]}
+      />
+
+      <BulkEditDialog
+        open={bulkEditDialogOpen}
+        onOpenChange={setBulkEditDialogOpen}
+        selectedIds={bulkSelectedIds}
+        itemType="products"
+        onSuccess={handleBulkEditSuccess}
       />
     </div>
   );

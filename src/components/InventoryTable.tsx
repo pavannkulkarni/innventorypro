@@ -11,10 +11,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Pencil, Trash2, Search, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 
 interface Product {
   id: string;
@@ -36,6 +38,7 @@ interface Product {
 interface InventoryTableProps {
   onEdit?: (product: Product) => void;
   onDelete?: (id: string) => void;
+  onBulkEdit?: (selectedIds: Set<string>) => void;
 }
 
 function getStatusVariant(quantity: number): "success" | "warning" | "danger" {
@@ -50,12 +53,23 @@ function getStatusLabel(quantity: number): string {
   return "In Stock";
 }
 
-export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
+export function InventoryTable({ onEdit, onDelete, onBulkEdit }: InventoryTableProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatPrice } = useCurrency();
+  
+  const {
+    selectedIds,
+    selectedCount,
+    toggleSelection,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+  } = useBulkSelection(products);
 
   useEffect(() => {
     fetchProducts();
@@ -175,6 +189,10 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
       product.categories?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    clearSelection();
+  }, [searchTerm, clearSelection]);
+
   if (loading) {
     return (
       <div className="flex justify-center p-8">
@@ -195,12 +213,41 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        {selectedCount > 0 && (
+          <>
+            <span className="text-sm text-muted-foreground">
+              {selectedCount} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onBulkEdit?.(selectedIds)}
+            >
+              Bulk Edit
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSelection}
+            >
+              Clear
+            </Button>
+          </>
+        )}
       </div>
 
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={toggleAll}
+                  aria-label="Select all"
+                  className={isSomeSelected ? "opacity-50" : ""}
+                />
+              </TableHead>
               <TableHead className="min-w-[150px]">Product Name</TableHead>
               <TableHead className="min-w-[100px]">SKU</TableHead>
               <TableHead className="min-w-[120px]">Category</TableHead>
@@ -214,13 +261,20 @@ export function InventoryTable({ onEdit, onDelete }: InventoryTableProps) {
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
             ) : (
               filteredProducts.map((product) => (
                 <TableRow key={product.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={isSelected(product.id)}
+                      onCheckedChange={() => toggleSelection(product.id)}
+                      aria-label={`Select ${product.name}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.sku || "-"}</TableCell>
                   <TableCell>{product.categories?.name || "-"}</TableCell>
