@@ -495,6 +495,102 @@ export type Database = {
           },
         ]
       }
+      sale_items: {
+        Row: {
+          created_at: string
+          discount: number
+          id: string
+          line_total: number
+          product_id: string
+          quantity: number
+          sale_id: string
+          unit_price: number
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          discount?: number
+          id?: string
+          line_total: number
+          product_id: string
+          quantity: number
+          sale_id: string
+          unit_price: number
+          updated_at?: string
+          user_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          discount?: number
+          id?: string
+          line_total?: number
+          product_id?: string
+          quantity?: number
+          sale_id?: string
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+          variant_id?: string | null
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          cashier_name: string | null
+          created_at: string
+          discount: number
+          id: string
+          notes: string | null
+          payment_method: string
+          payment_status: string
+          sale_date: string
+          sale_number: string
+          subtotal: number
+          tax: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+          warehouse_id: string
+        }
+        Insert: {
+          cashier_name?: string | null
+          created_at?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          payment_method: string
+          payment_status?: string
+          sale_date?: string
+          sale_number: string
+          subtotal?: number
+          tax?: number
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+          warehouse_id: string
+        }
+        Update: {
+          cashier_name?: string | null
+          created_at?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          payment_status?: string
+          sale_date?: string
+          sale_number?: string
+          subtotal?: number
+          tax?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+          warehouse_id?: string
+        }
+        Relationships: []
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -650,6 +746,7 @@ export type Database = {
     Functions: {
       check_low_stock_notifications: { Args: never; Returns: undefined }
       generate_po_number: { Args: never; Returns: string }
+      generate_sale_number: { Args: never; Returns: string }
     }
     Enums: {
       approval_status: "PENDING" | "APPROVED" | "REJECTED"
