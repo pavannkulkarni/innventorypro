@@ -65,9 +65,9 @@ export function ProductDialog({
     warehouse_id: "",
     currency_id: "",
     quantity: 0,
-    price: 0,
-    cost: 0,
-    reorder_level: 0,
+    price: "",
+    cost: "",
+    reorder_level: "",
   });
 
   useEffect(() => {
@@ -88,9 +88,9 @@ export function ProductDialog({
         warehouse_id: product.warehouse_id || "",
         currency_id: product.currency_id || "",
         quantity: product.quantity || 0,
-        price: product.price || 0,
-        cost: product.cost || 0,
-        reorder_level: product.reorder_level || 0,
+        price: product.price !== null && product.price !== undefined ? product.price : "",
+        cost: product.cost !== null && product.cost !== undefined ? product.cost : "",
+        reorder_level: product.reorder_level !== null && product.reorder_level !== undefined ? product.reorder_level : "",
       });
     } else {
       setFormData({
@@ -103,9 +103,9 @@ export function ProductDialog({
         warehouse_id: "",
         currency_id: "",
         quantity: 0,
-        price: 0,
-        cost: 0,
-        reorder_level: 0,
+        price: "",
+        cost: "",
+        reorder_level: "",
       });
     }
   }, [product]);
@@ -147,9 +147,9 @@ export function ProductDialog({
         barcode: formData.barcode || "",
         description: formData.description || "",
         quantity: Number(formData.quantity),
-        price: formData.price ? Number(formData.price) : undefined,
-        cost: formData.cost ? Number(formData.cost) : undefined,
-        reorder_level: Number(formData.reorder_level),
+        price: formData.price !== "" ? Number(formData.price) : undefined,
+        cost: formData.cost !== "" ? Number(formData.cost) : undefined,
+        reorder_level: formData.reorder_level !== "" ? Number(formData.reorder_level) : 0,
       });
 
       const productData = {
@@ -352,9 +352,10 @@ export function ProductDialog({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      price: parseFloat(e.target.value) || 0,
+                      price: e.target.value,
                     })
                   }
+                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
@@ -368,9 +369,10 @@ export function ProductDialog({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      cost: parseFloat(e.target.value) || 0,
+                      cost: e.target.value,
                     })
                   }
+                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
@@ -383,9 +385,10 @@ export function ProductDialog({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      reorder_level: parseInt(e.target.value) || 0,
+                      reorder_level: e.target.value,
                     })
                   }
+                  placeholder="0"
                 />
               </div>
             </div>

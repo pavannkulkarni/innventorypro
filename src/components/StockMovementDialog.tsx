@@ -64,7 +64,7 @@ export function StockMovementDialog({
     variant_id: "",
     warehouse_id: "",
     transaction_type: "PURCHASE",
-    quantity: 1,
+    quantity: "",
     reference_number: "",
     notes: "",
     transaction_date: new Date().toISOString().split("T")[0],
@@ -83,7 +83,7 @@ export function StockMovementDialog({
         variant_id: movement.variant_id || "",
         warehouse_id: movement.warehouse_id || "",
         transaction_type: movement.transaction_type || "PURCHASE",
-        quantity: movement.quantity || 1,
+        quantity: movement.quantity || "",
         reference_number: movement.reference_number || "",
         notes: movement.notes || "",
         transaction_date: movement.transaction_date
@@ -96,7 +96,7 @@ export function StockMovementDialog({
         variant_id: "",
         warehouse_id: "",
         transaction_type: "PURCHASE",
-        quantity: 1,
+        quantity: "",
         reference_number: "",
         notes: "",
         transaction_date: new Date().toISOString().split("T")[0],
@@ -107,7 +107,7 @@ export function StockMovementDialog({
         variant_id: "",
         warehouse_id: "",
         transaction_type: "PURCHASE",
-        quantity: 1,
+        quantity: "",
         reference_number: "",
         notes: "",
         transaction_date: new Date().toISOString().split("T")[0],
@@ -173,6 +173,7 @@ export function StockMovementDialog({
     try {
       const validatedData = movementSchema.parse({
         ...formData,
+        quantity: formData.quantity !== "" ? Number(formData.quantity) : 1,
         variant_id: formData.variant_id || undefined,
         reference_number: formData.reference_number || undefined,
         notes: formData.notes || undefined,
@@ -335,9 +336,10 @@ export function StockMovementDialog({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      quantity: parseInt(e.target.value) || 1,
+                      quantity: e.target.value,
                     })
                   }
+                  placeholder="1"
                   required
                 />
               </div>
