@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const poSchema = z.object({
   supplier_id: z.string().min(1, "Supplier is required"),
@@ -56,6 +57,7 @@ export function PurchaseOrderDialog({
   purchaseOrder,
   onSuccess,
 }: PurchaseOrderDialogProps) {
+  const { formatPrice } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -490,7 +492,7 @@ export function PurchaseOrderDialog({
               </div>
 
               <div className="flex justify-end text-lg font-semibold">
-                Total: ${calculateTotal().toFixed(2)}
+                Total: {formatPrice(calculateTotal())}
               </div>
             </div>
 
