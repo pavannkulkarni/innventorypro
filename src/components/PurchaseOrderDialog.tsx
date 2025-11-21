@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import {
   Dialog,
   DialogContent,
@@ -76,6 +77,23 @@ export function PurchaseOrderDialog({
   });
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: crypto.randomUUID(), product_id: "", variant_id: "", quantity: "", unit_price: "" },
+  ]);
+
+  // Keyboard shortcuts - Ctrl+S to save
+  useKeyboardShortcuts([
+    {
+      key: "s",
+      ctrl: true,
+      callback: (e) => {
+        if (open) {
+          e.preventDefault();
+          const form = document.getElementById('po-form') as HTMLFormElement;
+          if (form) {
+            form.requestSubmit();
+          }
+        }
+      },
+    },
   ]);
 
   useEffect(() => {
@@ -334,7 +352,7 @@ export function PurchaseOrderDialog({
             {purchaseOrder ? "Edit Purchase Order" : "Create Purchase Order"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form id="po-form" onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -544,7 +562,7 @@ export function PurchaseOrderDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : purchaseOrder ? "Update" : "Create"}
+              {loading ? "Saving..." : purchaseOrder ? "Update" : "Create"} (Ctrl+S)
             </Button>
           </DialogFooter>
         </form>

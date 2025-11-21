@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import {
   Table,
   TableBody,
@@ -45,6 +46,21 @@ export default function PurchaseOrders() {
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
   const [actionType, setActionType] = useState<"approve" | "reject">("approve");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: "n",
+      ctrl: true,
+      callback: () => handleAddNew(),
+    },
+    {
+      key: "k",
+      ctrl: true,
+      callback: () => searchInputRef.current?.focus(),
+    },
+  ]);
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -218,7 +234,8 @@ export default function PurchaseOrders() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search purchase orders..."
+            ref={searchInputRef}
+            placeholder="Search purchase orders... (Ctrl+K)"
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
