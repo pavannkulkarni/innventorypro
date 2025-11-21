@@ -37,7 +37,11 @@ const inventoryItems = [
 
 const purchaseItems = [
   { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
-  { title: "Point of Sale", url: "/pos", icon: CreditCard, color: "bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" },
+];
+
+const posItems = [
+  { title: "POS Terminal", url: "/pos", icon: CreditCard, color: "bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" },
+  { title: "Sales History", url: "/sales-history", icon: TrendingUp, color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" },
 ];
 
 const configItems = [
@@ -103,6 +107,32 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {purchaseItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild className="h-10">
+                    <NavLink
+                      to={item.url}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
+                      activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
+                    >
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${item.color}`}>
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                      </div>
+                      {open && <span className="text-sm font-medium">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mb-6">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
+            Point of Sale
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {posItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-10">
                     <NavLink
