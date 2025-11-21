@@ -115,7 +115,7 @@ export function CheckoutDialog({
 
       toast({
         title: "Sale Completed",
-        description: `Sale ${saleNumber} has been successfully processed`,
+        description: `Sale ${saleNumber} has been successfully processed. Stock updated automatically.`,
       });
 
       onComplete();
