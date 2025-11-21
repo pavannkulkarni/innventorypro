@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
+import { format, isToday } from "date-fns";
 
 interface InventoryItem {
   id: string;
@@ -17,10 +18,23 @@ interface InventoryItem {
   created_at?: string;
 }
 
+interface SaleItem {
+  id: string;
+  product_name: string;
+  variant_name?: string;
+  warehouse_name: string;
+  quantity: number;
+  transaction_date: string;
+  reference_number?: string;
+}
+
 export default function Dashboard() {
   const { formatPrice } = useCurrency();
   const [lowStockItems, setLowStockItems] = useState<InventoryItem[]>([]);
   const [recentProducts, setRecentProducts] = useState<InventoryItem[]>([]);
+  const [recentSales, setRecentSales] = useState<SaleItem[]>([]);
+  const [todaySales, setTodaySales] = useState<SaleItem[]>([]);
+  const [todaySalesTotal, setTodaySalesTotal] = useState({ quantity: 0, count: 0 });
 
   useEffect(() => {
     fetchDashboardData();
@@ -122,6 +136,49 @@ export default function Dashboard() {
 
     setLowStockItems(lowStock);
     setRecentProducts(Array.from(recentMovementsMap.values()));
+
+    // Fetch sales data
+    const { data: salesMovements } = await supabase
+      .from("stock_movements")
+      .select(`
+        id,
+        product_id,
+        variant_id,
+        warehouse_id,
+        quantity,
+        transaction_date,
+        reference_number,
+        products(name),
+        product_variants(name),
+        warehouses(name)
+      `)
+      .eq("user_id", session.user.id)
+      .eq("transaction_type", "SALE")
+      .order("transaction_date", { ascending: false })
+      .limit(50);
+
+    const formattedSales: SaleItem[] = salesMovements?.map((sale: any) => ({
+      id: sale.id,
+      product_name: sale.products?.name || "",
+      variant_name: sale.product_variants?.name,
+      warehouse_name: sale.warehouses?.name || "",
+      quantity: sale.quantity,
+      transaction_date: sale.transaction_date,
+      reference_number: sale.reference_number,
+    })) || [];
+
+    setRecentSales(formattedSales.slice(0, 10));
+
+    // Filter today's sales
+    const today = formattedSales.filter(sale => isToday(new Date(sale.transaction_date)));
+    setTodaySales(today);
+    
+    const todayTotal = today.reduce((acc, sale) => ({
+      quantity: acc.quantity + sale.quantity,
+      count: acc.count + 1
+    }), { quantity: 0, count: 0 });
+    
+    setTodaySalesTotal(todayTotal);
   };
 
   return (
@@ -134,6 +191,88 @@ export default function Dashboard() {
       </div>
 
       <DashboardStats />
+
+      {/* Sales Overview Cards */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg">Today's Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Transactions</p>
+                  <p className="text-2xl font-bold">{todaySalesTotal.count}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Total Units Sold</p>
+                  <p className="text-2xl font-bold">{todaySalesTotal.quantity}</p>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {todaySales.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No sales today yet</p>
+                ) : (
+                  todaySales.map((sale) => (
+                    <div
+                      key={sale.id}
+                      className="flex items-center justify-between gap-2 border-b border-divider pb-2 last:border-0 last:pb-0"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">
+                          {sale.product_name}
+                          {sale.variant_name && ` - ${sale.variant_name}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(sale.transaction_date), "HH:mm")} • {sale.warehouse_name}
+                        </p>
+                      </div>
+                      <Badge variant="success" className="flex-shrink-0">
+                        {sale.quantity} units
+                      </Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg">Recent Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {recentSales.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No sales yet</p>
+              ) : (
+                recentSales.map((sale) => (
+                  <div
+                    key={sale.id}
+                    className="flex items-center justify-between gap-2 border-b border-divider pb-2 last:border-0 last:pb-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">
+                        {sale.product_name}
+                        {sale.variant_name && ` - ${sale.variant_name}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {format(new Date(sale.transaction_date), "MMM dd, HH:mm")} • {sale.warehouse_name}
+                        {sale.reference_number && ` • Ref: ${sale.reference_number}`}
+                      </p>
+                    </div>
+                    <Badge variant="success" className="flex-shrink-0">
+                      {sale.quantity} units
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card className="overflow-hidden">
