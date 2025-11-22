@@ -11,11 +11,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo.svg";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  appType: z.enum(["inventory", "pos"], {
+    required_error: "Please select an application",
+  }),
 });
 
 const signUpSchema = z.object({
@@ -48,6 +52,7 @@ const Auth = () => {
     defaultValues: {
       email: "",
       password: "",
+      appType: "inventory",
     },
   });
 
@@ -96,9 +101,12 @@ const Auth = () => {
 
       toast({
         title: "Welcome back!",
-        description: "You've successfully signed in.",
+        description: `You've successfully signed in to ${data.appType === 'pos' ? 'POS' : 'Inventory Management'}.`,
       });
-      navigate("/");
+      
+      // Navigate based on selected application
+      const targetPath = data.appType === 'pos' ? '/pos' : '/';
+      navigate(targetPath);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -252,6 +260,27 @@ const Auth = () => {
             <TabsContent value="signin">
               <Form {...signInForm}>
                 <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+                  <FormField
+                    control={signInForm.control}
+                    name="appType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Application</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose application" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="inventory">Inventory Management</SelectItem>
+                            <SelectItem value="pos">Point of Sale (POS)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={signInForm.control}
                     name="email"
