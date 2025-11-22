@@ -12,6 +12,7 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { ShoppingCart } from "@/components/POS/ShoppingCart";
 import { ProductGrid } from "@/components/POS/ProductGrid";
 import { CheckoutDialog } from "@/components/POS/CheckoutDialog";
+import { SalesHistoryDialog } from "@/components/POS/SalesHistoryDialog";
 import { Search, Scan, ShoppingBag, LogOut, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.svg";
@@ -36,6 +37,7 @@ export default function POS() {
   const [searchTerm, setSearchTerm] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [salesHistoryOpen, setSalesHistoryOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string>("");
   const { formatPrice } = useCurrency();
@@ -288,7 +290,7 @@ export default function POS() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate("/sales-history")}
+            onClick={() => setSalesHistoryOpen(true)}
             className="gap-2"
           >
             <History className="h-4 w-4" />
@@ -394,6 +396,13 @@ export default function POS() {
         userId={userId}
         onComplete={handleCheckoutComplete}
         formatPrice={formatPrice}
+      />
+
+      {/* Sales History Dialog */}
+      <SalesHistoryDialog
+        open={salesHistoryOpen}
+        onClose={() => setSalesHistoryOpen(false)}
+        userId={userId}
       />
     </div>
   );
