@@ -35,10 +35,7 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
         .select(`
           *,
           customers (name),
-          sale_items (
-            *,
-            products (name)
-          )
+          sale_items (*)
         `)
         .eq("user_id", userId)
         .order("sale_date", { ascending: false })

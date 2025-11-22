@@ -13,7 +13,8 @@ import { ShoppingCart } from "@/components/POS/ShoppingCart";
 import { ProductGrid } from "@/components/POS/ProductGrid";
 import { CheckoutDialog } from "@/components/POS/CheckoutDialog";
 import { SalesHistoryDialog } from "@/components/POS/SalesHistoryDialog";
-import { Search, Scan, ShoppingBag, LogOut, History } from "lucide-react";
+import { CustomersDialog } from "@/components/POS/CustomersDialog";
+import { Search, Scan, ShoppingBag, LogOut, History, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 
@@ -38,6 +39,7 @@ export default function POS() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [salesHistoryOpen, setSalesHistoryOpen] = useState(false);
+  const [customersOpen, setCustomersOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string>("");
   const { formatPrice } = useCurrency();
@@ -290,6 +292,15 @@ export default function POS() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setCustomersOpen(true)}
+            className="gap-2"
+          >
+            <Users className="h-4 w-4" />
+            Customers
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setSalesHistoryOpen(true)}
             className="gap-2"
           >
@@ -402,6 +413,13 @@ export default function POS() {
       <SalesHistoryDialog
         open={salesHistoryOpen}
         onClose={() => setSalesHistoryOpen(false)}
+        userId={userId}
+      />
+
+      {/* Customers Dialog */}
+      <CustomersDialog
+        open={customersOpen}
+        onClose={() => setCustomersOpen(false)}
         userId={userId}
       />
     </div>

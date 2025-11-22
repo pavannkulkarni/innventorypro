@@ -45,9 +45,6 @@ const purchaseItems = [
   { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
 ];
 
-const salesItems = [
-  { title: "Customers", url: "/customers", icon: UserCircle, color: "bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" },
-];
 
 const configItems = [
   { title: "Product Master", url: "/product-master", icon: Package, color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" },
@@ -131,31 +128,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mb-6">
-          <SidebarGroupLabel className="px-3 text-xs font-semibold text-text-primary mb-2 uppercase tracking-wide">
-            Sales
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {salesItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-10">
-                    <NavLink
-                      to={item.url}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
-                      activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
-                    >
-                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${item.color}`}>
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                      </div>
-                      {open && <span className="text-sm font-medium">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         <Collapsible defaultOpen className="mb-6">
           <SidebarGroup>
