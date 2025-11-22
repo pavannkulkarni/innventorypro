@@ -12,7 +12,7 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { ShoppingCart } from "@/components/POS/ShoppingCart";
 import { ProductGrid } from "@/components/POS/ProductGrid";
 import { CheckoutDialog } from "@/components/POS/CheckoutDialog";
-import { Search, Scan, ShoppingBag, LogOut } from "lucide-react";
+import { Search, Scan, ShoppingBag, LogOut, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.svg";
 
@@ -285,6 +285,15 @@ export default function POS() {
               <option key={w.id} value={w.id}>{w.name}</option>
             ))}
           </select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/sales-history")}
+            className="gap-2"
+          >
+            <History className="h-4 w-4" />
+            Sales History
+          </Button>
           <Button
             variant="ghost"
             size="sm"

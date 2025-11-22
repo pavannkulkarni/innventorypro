@@ -201,6 +201,12 @@ export function CheckoutDialog({
                     UPI
                   </div>
                 </SelectItem>
+                <SelectItem value="credit">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    On-Credit
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
