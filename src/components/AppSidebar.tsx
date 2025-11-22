@@ -45,7 +45,6 @@ const purchaseItems = [
 ];
 
 const posItems = [
-  { title: "POS Terminal", url: "/pos", icon: CreditCard, color: "bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400" },
   { title: "Sales History", url: "/sales-history", icon: TrendingUp, color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" },
 ];
 
