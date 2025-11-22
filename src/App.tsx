@@ -24,8 +24,6 @@ import PurchaseOrders from "./pages/PurchaseOrders";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import POS from "./pages/POS";
-import SalesHistory from "./pages/SalesHistory";
-import Customers from "./pages/Customers";
 import InstallPWA from "./pages/InstallPWA";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -173,8 +171,6 @@ const App = () => {
                                 <Route path="/suppliers" element={<Suppliers />} />
                                 <Route path="/categories" element={<Categories />} />
                                 <Route path="/purchase-orders" element={<PurchaseOrders />} />
-                                <Route path="/sales-history" element={<SalesHistory />} />
-                                <Route path="/customers" element={<Customers />} />
                                 <Route path="/analytics" element={<Analytics />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/install" element={<InstallPWA />} />
