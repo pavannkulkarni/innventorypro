@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Banknote, Smartphone } from "lucide-react";
+import { CreditCard, Banknote, Smartphone, Plus } from "lucide-react";
+import { CustomerDialog } from "@/components/CustomerDialog";
 
 interface CartItem {
   id: string;
@@ -52,6 +53,9 @@ export function CheckoutDialog({
   formatPrice,
 }: CheckoutDialogProps) {
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [customerId, setCustomerId] = useState("");
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [notes, setNotes] = useState("");
@@ -59,12 +63,43 @@ export function CheckoutDialog({
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (open && userId) {
+      fetchCustomers();
+    }
+  }, [open, userId]);
+
+  const fetchCustomers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      setCustomers(data || []);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const taxAmount = (subtotal * tax) / 100;
   const discountAmount = (subtotal * discount) / 100;
   const total = subtotal + taxAmount - discountAmount;
 
   const handleCheckout = async () => {
+    if (paymentMethod === "credit" && !customerId) {
+      toast({
+        title: "Customer Required",
+        description: "Please select a customer for on-credit transactions",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessing(true);
     try {
       // Generate sale number
@@ -81,12 +116,13 @@ export function CheckoutDialog({
           user_id: userId,
           sale_number: saleNumber,
           warehouse_id: warehouseId,
+          customer_id: customerId || null,
           subtotal,
           tax: taxAmount,
           discount: discountAmount,
           total_amount: total,
           payment_method: paymentMethod,
-          payment_status: "completed",
+          payment_status: paymentMethod === "credit" ? "pending" : "completed",
           notes,
           cashier_name: cashierName,
         })
@@ -113,6 +149,22 @@ export function CheckoutDialog({
 
       if (itemsError) throw itemsError;
 
+      // Update customer credit balance if on-credit
+      if (paymentMethod === "credit" && customerId) {
+        const { data: customer } = await supabase
+          .from("customers")
+          .select("credit_balance")
+          .eq("id", customerId)
+          .single();
+        
+        if (customer) {
+          await supabase
+            .from("customers")
+            .update({ credit_balance: (customer.credit_balance || 0) + total })
+            .eq("id", customerId);
+        }
+      }
+
       toast({
         title: "Sale Completed",
         description: `Sale ${saleNumber} has been successfully processed. Stock updated automatically.`,
@@ -134,6 +186,7 @@ export function CheckoutDialog({
 
   const resetForm = () => {
     setPaymentMethod("cash");
+    setCustomerId("");
     setDiscount(0);
     setTax(0);
     setNotes("");
@@ -210,6 +263,40 @@ export function CheckoutDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Customer Selection (for On-Credit) */}
+          {paymentMethod === "credit" && (
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <div className="flex gap-2">
+                <Select value={customerId} onValueChange={setCustomerId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                        {customer.credit_balance > 0 && (
+                          <span className="text-xs text-danger ml-2">
+                            (Bal: {formatPrice(customer.credit_balance)})
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCustomerDialogOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Tax & Discount */}
           <div className="grid grid-cols-2 gap-4">
@@ -295,6 +382,15 @@ export function CheckoutDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+      
+      <CustomerDialog
+        open={customerDialogOpen}
+        onClose={() => setCustomerDialogOpen(false)}
+        onSuccess={() => {
+          fetchCustomers();
+          setCustomerDialogOpen(false);
+        }}
+      />
     </Dialog>
   );
 }

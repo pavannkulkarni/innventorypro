@@ -97,6 +97,51 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          credit_balance: number
+          credit_limit: number | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          credit_balance?: number
+          credit_limit?: number | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          credit_balance?: number
+          credit_limit?: number | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -549,6 +594,7 @@ export type Database = {
         Row: {
           cashier_name: string | null
           created_at: string
+          customer_id: string | null
           discount: number
           id: string
           notes: string | null
@@ -566,6 +612,7 @@ export type Database = {
         Insert: {
           cashier_name?: string | null
           created_at?: string
+          customer_id?: string | null
           discount?: number
           id?: string
           notes?: string | null
@@ -583,6 +630,7 @@ export type Database = {
         Update: {
           cashier_name?: string | null
           created_at?: string
+          customer_id?: string | null
           discount?: number
           id?: string
           notes?: string | null
@@ -597,7 +645,15 @@ export type Database = {
           user_id?: string
           warehouse_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_movements: {
         Row: {
