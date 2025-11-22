@@ -68,6 +68,18 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={session ? <Navigate to="/" replace /> : <Auth />} />
+              
+              {/* POS Application - Standalone */}
+              <Route
+                path="/pos"
+                element={
+                  <ProtectedRoute>
+                    <POS />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* Inventory Management Application */}
               <Route
                 path="/*"
                 element={
@@ -160,7 +172,6 @@ const App = () => {
                                 <Route path="/suppliers" element={<Suppliers />} />
                                 <Route path="/categories" element={<Categories />} />
                                 <Route path="/purchase-orders" element={<PurchaseOrders />} />
-                                <Route path="/pos" element={<POS />} />
                                 <Route path="/sales-history" element={<SalesHistory />} />
                                 <Route path="/analytics" element={<Analytics />} />
                                 <Route path="/settings" element={<Settings />} />
