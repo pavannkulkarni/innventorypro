@@ -234,12 +234,11 @@ export function CheckoutDialog({
             <div className="space-y-2">
               <Label>Customer (Optional)</Label>
               <div className="flex gap-2">
-                <Select value={customerId} onValueChange={setCustomerId}>
+                <Select value={customerId || undefined} onValueChange={(value) => setCustomerId(value)}>
                   <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select customer" />
+                    <SelectValue placeholder="No customer selected" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Customer</SelectItem>
                     {customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
                         {customer.name}
