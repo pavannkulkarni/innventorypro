@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -58,7 +57,6 @@ export function CheckoutDialog({
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
-  const [notes, setNotes] = useState("");
   const [cashierName, setCashierName] = useState("");
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
@@ -123,7 +121,6 @@ export function CheckoutDialog({
           total_amount: total,
           payment_method: paymentMethod,
           payment_status: paymentMethod === "credit" ? "pending" : "completed",
-          notes,
           cashier_name: cashierName,
         })
         .select()
@@ -189,7 +186,6 @@ export function CheckoutDialog({
     setCustomerId("");
     setDiscount(0);
     setTax(0);
-    setNotes("");
     setCashierName("");
   };
 
@@ -202,23 +198,29 @@ export function CheckoutDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Checkout</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Order Summary */}
-          <div className="space-y-2">
-            <h3 className="font-medium text-text-primary">Order Summary</h3>
-            <div className="bg-surface-200 rounded-lg p-3 space-y-2 text-sm">
+        <div className="grid grid-cols-2 gap-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)]">
+          {/* LEFT COLUMN - Order Summary */}
+          <div className="space-y-4 pr-4 border-r border-divider">
+            <h3 className="font-semibold text-text-primary text-lg">Order Summary</h3>
+            <div className="space-y-2">
               {cart.map((item) => (
-                <div key={item.id} className="flex justify-between">
-                  <span className="text-text-secondary">
-                    {item.quantity}x {item.name}
-                    {item.variant_name && ` - ${item.variant_name}`}
-                  </span>
-                  <span className="text-text-primary">
+                <div key={item.id} className="flex justify-between items-start bg-surface-200 rounded-lg p-3">
+                  <div className="flex-1">
+                    <p className="text-text-primary font-medium">
+                      {item.quantity}x {item.name}
+                    </p>
+                    {item.variant_name && (
+                      <p className="text-text-secondary text-sm">
+                        {item.variant_name}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-text-primary font-semibold">
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
@@ -226,59 +228,23 @@ export function CheckoutDialog({
             </div>
           </div>
 
-          <Separator />
-
-          {/* Payment Method */}
-          <div className="space-y-2">
-            <Label>Payment Method</Label>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cash">
-                  <div className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4" />
-                    Cash
-                  </div>
-                </SelectItem>
-                <SelectItem value="card">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    Card
-                  </div>
-                </SelectItem>
-                <SelectItem value="upi">
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="h-4 w-4" />
-                    UPI
-                  </div>
-                </SelectItem>
-                <SelectItem value="credit">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    On-Credit
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Customer Selection (for On-Credit) */}
-          {paymentMethod === "credit" && (
+          {/* RIGHT COLUMN - Payment Details */}
+          <div className="space-y-6 pl-4">
+            {/* Customer Selection */}
             <div className="space-y-2">
-              <Label>Customer *</Label>
+              <Label>Customer (Optional)</Label>
               <div className="flex gap-2">
                 <Select value={customerId} onValueChange={setCustomerId}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select customer" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">No Customer</SelectItem>
                     {customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
                         {customer.name}
                         {customer.credit_balance > 0 && (
-                          <span className="text-xs text-danger ml-2">
+                          <span className="text-xs text-status-danger ml-2">
                             (Bal: {formatPrice(customer.credit_balance)})
                           </span>
                         )}
@@ -296,84 +262,114 @@ export function CheckoutDialog({
                 </Button>
               </div>
             </div>
-          )}
 
-          {/* Tax & Discount */}
-          <div className="grid grid-cols-2 gap-4">
+            {/* Payment Method */}
             <div className="space-y-2">
-              <Label>Tax (%)</Label>
+              <Label>Payment Method</Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">
+                    <div className="flex items-center gap-2">
+                      <Banknote className="h-4 w-4" />
+                      Cash
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="card">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      Card
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="upi">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="h-4 w-4" />
+                      UPI
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="credit">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      On-Credit
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {paymentMethod === "credit" && !customerId && (
+                <p className="text-xs text-status-danger">
+                  Customer required for on-credit transactions
+                </p>
+              )}
+            </div>
+
+            {/* Tax & Discount */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tax (%)</Label>
+                <Input
+                  type="number"
+                  value={tax}
+                  onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Discount (%)</Label>
+                <Input
+                  type="number"
+                  value={discount}
+                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+              </div>
+            </div>
+
+            {/* Cashier Name */}
+            <div className="space-y-2">
+              <Label>Cashier Name (Optional)</Label>
               <Input
-                type="number"
-                value={tax}
-                onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                min="0"
-                max="100"
-                step="0.1"
+                value={cashierName}
+                onChange={(e) => setCashierName(e.target.value)}
+                placeholder="Enter cashier name"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Discount (%)</Label>
-              <Input
-                type="number"
-                value={discount}
-                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                min="0"
-                max="100"
-                step="0.1"
-              />
-            </div>
-          </div>
 
-          {/* Cashier Name */}
-          <div className="space-y-2">
-            <Label>Cashier Name (Optional)</Label>
-            <Input
-              value={cashierName}
-              onChange={(e) => setCashierName(e.target.value)}
-              placeholder="Enter cashier name"
-            />
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label>Notes (Optional)</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes..."
-              rows={2}
-            />
-          </div>
-
-          <Separator />
-
-          {/* Total */}
-          <div className="space-y-2 bg-surface-200 rounded-lg p-4">
-            <div className="flex justify-between text-text-secondary text-sm">
-              <span>Subtotal:</span>
-              <span>{formatPrice(subtotal)}</span>
-            </div>
-            {taxAmount > 0 && (
-              <div className="flex justify-between text-text-secondary text-sm">
-                <span>Tax ({tax}%):</span>
-                <span>{formatPrice(taxAmount)}</span>
-              </div>
-            )}
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-success text-sm">
-                <span>Discount ({discount}%):</span>
-                <span>-{formatPrice(discountAmount)}</span>
-              </div>
-            )}
             <Separator />
-            <div className="flex justify-between text-lg font-semibold text-text-primary">
-              <span>Total:</span>
-              <span>{formatPrice(total)}</span>
+
+            {/* Total */}
+            <div className="space-y-3 bg-surface-200 rounded-lg p-4">
+              <div className="flex justify-between text-text-secondary">
+                <span>Subtotal:</span>
+                <span className="font-medium">{formatPrice(subtotal)}</span>
+              </div>
+              {taxAmount > 0 && (
+                <div className="flex justify-between text-text-secondary">
+                  <span>Tax ({tax}%):</span>
+                  <span className="font-medium">{formatPrice(taxAmount)}</span>
+                </div>
+              )}
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-status-success">
+                  <span>Discount ({discount}%):</span>
+                  <span className="font-medium">-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex justify-between text-xl font-bold text-text-primary">
+                <span>Total:</span>
+                <span>{formatPrice(total)}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="border-t border-divider pt-4">
           <Button variant="outline" onClick={handleClose} disabled={processing}>
             Cancel
           </Button>
