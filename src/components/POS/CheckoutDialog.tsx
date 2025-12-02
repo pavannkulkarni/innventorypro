@@ -55,8 +55,8 @@ export function CheckoutDialog({
   const [customerId, setCustomerId] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
-  const [discount, setDiscount] = useState(0);
-  const [tax, setTax] = useState(0);
+  const [discount, setDiscount] = useState<string>("");
+  const [tax, setTax] = useState<string>("");
   const [cashierName, setCashierName] = useState("");
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
@@ -84,8 +84,10 @@ export function CheckoutDialog({
   };
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const taxAmount = (subtotal * tax) / 100;
-  const discountAmount = (subtotal * discount) / 100;
+  const taxValue = parseFloat(tax) || 0;
+  const discountValue = parseFloat(discount) || 0;
+  const taxAmount = (subtotal * taxValue) / 100;
+  const discountAmount = (subtotal * discountValue) / 100;
   const total = subtotal + taxAmount - discountAmount;
 
   const handleCheckout = async () => {
@@ -184,8 +186,8 @@ export function CheckoutDialog({
   const resetForm = () => {
     setPaymentMethod("cash");
     setCustomerId("");
-    setDiscount(0);
-    setTax(0);
+    setDiscount("");
+    setTax("");
     setCashierName("");
   };
 
@@ -310,7 +312,8 @@ export function CheckoutDialog({
                 <Input
                   type="number"
                   value={tax}
-                  onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setTax(e.target.value)}
+                  placeholder="0"
                   min="0"
                   max="100"
                   step="0.1"
@@ -321,7 +324,8 @@ export function CheckoutDialog({
                 <Input
                   type="number"
                   value={discount}
-                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  placeholder="0"
                   min="0"
                   max="100"
                   step="0.1"
@@ -349,13 +353,13 @@ export function CheckoutDialog({
               </div>
               {taxAmount > 0 && (
                 <div className="flex justify-between text-text-secondary">
-                  <span>Tax ({tax}%):</span>
+                  <span>Tax ({taxValue}%):</span>
                   <span className="font-medium">{formatPrice(taxAmount)}</span>
                 </div>
               )}
               {discountAmount > 0 && (
                 <div className="flex justify-between text-status-success">
-                  <span>Discount ({discount}%):</span>
+                  <span>Discount ({discountValue}%):</span>
                   <span className="font-medium">-{formatPrice(discountAmount)}</span>
                 </div>
               )}
