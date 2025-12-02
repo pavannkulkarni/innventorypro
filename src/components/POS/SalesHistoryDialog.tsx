@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
-import { Search, X, Eye } from "lucide-react";
+import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 interface SalesHistoryDialogProps {
@@ -19,6 +19,7 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const { formatPrice } = useCurrency();
 
   useEffect(() => {
@@ -35,7 +36,11 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
         .select(`
           *,
           customers (name),
-          sale_items (*)
+          sale_items (
+            *,
+            products (name),
+            product_variants (name)
+          )
         `)
         .eq("user_id", userId)
         .order("sale_date", { ascending: false })
@@ -48,6 +53,18 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSaleExpansion = (saleId: string) => {
+    setExpandedSales(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(saleId)) {
+        newSet.delete(saleId);
+      } else {
+        newSet.add(saleId);
+      }
+      return newSet;
+    });
   };
 
   const filteredSales = sales.filter(sale =>
@@ -98,63 +115,77 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredSales.map((sale) => (
-                  <div
-                    key={sale.id}
-                    className="p-4 rounded-lg bg-surface-100 border border-divider hover:bg-muted-100 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-text-primary">{sale.sale_number}</p>
-                        <p className="text-sm text-text-secondary">
-                          {format(new Date(sale.sale_date), "PPp")}
-                        </p>
-                        {sale.customers && (
-                          <p className="text-sm text-text-secondary mt-1">
-                            Customer: {sale.customers.name}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-accent-primary">
-                          {formatPrice(sale.total_amount)}
-                        </p>
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant="outline" className={getPaymentStatusColor(sale.payment_status)}>
-                            {sale.payment_status}
-                          </Badge>
-                          <Badge variant="outline">
-                            {sale.payment_method}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {sale.sale_items && sale.sale_items.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-divider">
-                        <p className="text-xs text-text-secondary mb-2">Items:</p>
-                        <div className="space-y-1">
-                          {sale.sale_items.map((item: any, idx: number) => (
-                            <div key={idx} className="flex justify-between text-sm">
-                              <span className="text-text-secondary">
-                                {item.quantity}x {item.products?.name}
-                              </span>
-                              <span className="text-text-primary">
-                                {formatPrice(item.line_total)}
-                              </span>
+                {filteredSales.map((sale) => {
+                  const isExpanded = expandedSales.has(sale.id);
+                  return (
+                    <div
+                      key={sale.id}
+                      className="rounded-lg bg-surface-100 border border-divider overflow-hidden"
+                    >
+                      <div className="p-4 flex items-center justify-between hover:bg-muted-100 transition-colors">
+                        <button
+                          onClick={() => toggleSaleExpansion(sale.id)}
+                          className="flex items-center gap-3 flex-1 text-left"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-5 w-5 text-accent-primary flex-shrink-0" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-text-secondary flex-shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <p className="font-semibold text-text-primary">{sale.sale_number}</p>
+                              <p className="text-sm text-text-secondary">
+                                {format(new Date(sale.sale_date), "PPp")}
+                              </p>
+                              {sale.customers && (
+                                <p className="text-sm text-text-secondary">
+                                  {sale.customers.name}
+                                </p>
+                              )}
                             </div>
-                          ))}
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-3 ml-4">
+                          <p className="text-xl font-bold text-accent-primary whitespace-nowrap">
+                            {formatPrice(sale.total_amount)}
+                          </p>
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className={getPaymentStatusColor(sale.payment_status)}>
+                              {sale.payment_status}
+                            </Badge>
+                            <Badge variant="outline">
+                              {sale.payment_method}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                    )}
-                    
-                    {sale.notes && (
-                      <p className="text-sm text-text-secondary mt-2 italic">
-                        Note: {sale.notes}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                      
+                      {isExpanded && sale.sale_items && sale.sale_items.length > 0 && (
+                        <div className="px-4 pb-4 pt-2 border-t border-divider bg-bg-200">
+                          <p className="text-xs text-text-secondary mb-2 font-medium">Items Sold:</p>
+                          <div className="space-y-2">
+                            {sale.sale_items.map((item: any, idx: number) => {
+                              const productName = item.variant_id 
+                                ? `${item.products?.name} - ${item.product_variants?.name}`
+                                : item.products?.name;
+                              return (
+                                <div key={idx} className="flex justify-between text-sm py-1">
+                                  <span className="text-text-secondary">
+                                    {item.quantity}x {productName}
+                                  </span>
+                                  <span className="text-text-primary font-medium">
+                                    {formatPrice(item.line_total)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </ScrollArea>
