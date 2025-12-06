@@ -21,6 +21,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Banknote, Smartphone, Plus } from "lucide-react";
 import { CustomerDialog } from "@/components/CustomerDialog";
+import { z } from "zod";
+
+const checkoutSchema = z.object({
+  tax: z.number().min(0, "Tax cannot be negative").max(100, "Tax cannot exceed 100%"),
+  discount: z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%"),
+  cashierName: z.string().trim().max(100, "Cashier name must be less than 100 characters").optional().or(z.literal("")),
+  paymentMethod: z.enum(["cash", "card", "upi", "credit"], { errorMap: () => ({ message: "Please select a payment method" }) }),
+});
 
 interface CartItem {
   id: string;
@@ -91,17 +99,26 @@ export function CheckoutDialog({
   const total = subtotal + taxAmount - discountAmount;
 
   const handleCheckout = async () => {
-    if (paymentMethod === "credit" && !customerId) {
-      toast({
-        title: "Customer Required",
-        description: "Please select a customer for on-credit transactions",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setProcessing(true);
     try {
+      // Validate inputs
+      const validatedData = checkoutSchema.parse({
+        tax: taxValue,
+        discount: discountValue,
+        cashierName,
+        paymentMethod,
+      });
+
+      if (paymentMethod === "credit" && !customerId) {
+        toast({
+          title: "Customer Required",
+          description: "Please select a customer for on-credit transactions",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProcessing(true);
+
       // Generate sale number
       const { data: saleNumberData, error: saleNumberError } = await supabase
         .rpc('generate_sale_number');
@@ -172,6 +189,14 @@ export function CheckoutDialog({
       onComplete();
       resetForm();
     } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0]?.message || "Invalid input",
+          variant: "destructive",
+        });
+        return;
+      }
       console.error("Checkout error:", error);
       toast({
         title: "Error",
