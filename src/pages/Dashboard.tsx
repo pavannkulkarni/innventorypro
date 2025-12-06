@@ -167,7 +167,7 @@ export default function Dashboard() {
       reference_number: sale.reference_number,
     })) || [];
 
-    setRecentSales(formattedSales.slice(0, 10));
+    setRecentSales(formattedSales.slice(0, 5));
 
     // Filter today's sales
     const today = formattedSales.filter(sale => isToday(new Date(sale.transaction_date)));
