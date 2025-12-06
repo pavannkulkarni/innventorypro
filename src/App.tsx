@@ -12,6 +12,7 @@ import { AppSidebar } from "./components/AppSidebar";
 import { GlobalSearch } from "./components/GlobalSearch";
 import { NotificationBell } from "./components/NotificationBell";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import ProductMaster from "./pages/ProductMaster";
 import StockMovements from "./pages/StockMovements";
@@ -66,7 +67,9 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={session ? <Navigate to="/" replace /> : <Auth />} />
+              {/* Public Landing Page */}
+              <Route path="/" element={session ? <Navigate to="/dashboard" replace /> : <Landing />} />
+              <Route path="/auth" element={session ? <Navigate to="/dashboard" replace /> : <Auth />} />
               
               {/* POS Application - Standalone */}
               <Route
@@ -80,7 +83,7 @@ const App = () => {
               
               {/* Inventory Management Application */}
               <Route
-                path="/*"
+                path="/dashboard/*"
                 element={
                   <ProtectedRoute>
                     <SidebarProvider defaultOpen={true}>
@@ -162,18 +165,18 @@ const App = () => {
                           <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
                             <div className="container mx-auto max-w-7xl">
                               <Routes>
-                                <Route path="/" element={<Dashboard />} />
-                                <Route path="/product-master" element={<ProductMaster />} />
-                                <Route path="/product-master/:productId/variants" element={<ProductVariants />} />
-                                <Route path="/stock-movements" element={<StockMovements />} />
-                                <Route path="/inventory" element={<InventoryView />} />
-                                <Route path="/warehouses" element={<Warehouses />} />
-                                <Route path="/suppliers" element={<Suppliers />} />
-                                <Route path="/categories" element={<Categories />} />
-                                <Route path="/purchase-orders" element={<PurchaseOrders />} />
-                                <Route path="/analytics" element={<Analytics />} />
-                                <Route path="/settings" element={<Settings />} />
-                                <Route path="/install" element={<InstallPWA />} />
+                                <Route index element={<Dashboard />} />
+                                <Route path="product-master" element={<ProductMaster />} />
+                                <Route path="product-master/:productId/variants" element={<ProductVariants />} />
+                                <Route path="stock-movements" element={<StockMovements />} />
+                                <Route path="inventory" element={<InventoryView />} />
+                                <Route path="warehouses" element={<Warehouses />} />
+                                <Route path="suppliers" element={<Suppliers />} />
+                                <Route path="categories" element={<Categories />} />
+                                <Route path="purchase-orders" element={<PurchaseOrders />} />
+                                <Route path="analytics" element={<Analytics />} />
+                                <Route path="settings" element={<Settings />} />
+                                <Route path="install" element={<InstallPWA />} />
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                             </div>

@@ -36,25 +36,25 @@ import {
 } from "@/components/ui/collapsible";
 
 const inventoryItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" },
-  { title: "Inventory View", url: "/inventory", icon: Archive, color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" },
-  { title: "Stock Movements", url: "/stock-movements", icon: TrendingUp, color: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400" },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, color: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" },
+  { title: "Inventory View", url: "/dashboard/inventory", icon: Archive, color: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" },
+  { title: "Stock Movements", url: "/dashboard/stock-movements", icon: TrendingUp, color: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400" },
 ];
 
 const purchaseItems = [
-  { title: "Purchase Orders", url: "/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
+  { title: "Purchase Orders", url: "/dashboard/purchase-orders", icon: ShoppingCart, color: "bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400" },
 ];
 
 
 const configItems = [
-  { title: "Product Master", url: "/product-master", icon: Package, color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" },
-  { title: "Warehouses", url: "/warehouses", icon: Warehouse, color: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400" },
-  { title: "Suppliers", url: "/suppliers", icon: Users, color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400" },
-  { title: "Categories", url: "/categories", icon: FolderTree, color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400" },
+  { title: "Product Master", url: "/dashboard/product-master", icon: Package, color: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" },
+  { title: "Warehouses", url: "/dashboard/warehouses", icon: Warehouse, color: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400" },
+  { title: "Suppliers", url: "/dashboard/suppliers", icon: Users, color: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400" },
+  { title: "Categories", url: "/dashboard/categories", icon: FolderTree, color: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400" },
 ];
 
 const insightsItems = [
-  { title: "Analytics", url: "/analytics", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400" },
+  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3, color: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400" },
 ];
 
 export function AppSidebar() {
@@ -63,7 +63,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-divider bg-surface-200">
       <SidebarHeader className="h-16 px-6 border-b border-divider flex items-center">
-        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src={logo} alt="InnoventoryPro Logo" className="h-10 w-10" />
           {open && (
             <div>
@@ -86,7 +86,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
-                      end={item.url === "/"}
+                      end={item.url === "/dashboard"}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-text-primary hover:bg-muted-100 transition-colors group"
                       activeClassName="bg-accent-primary/10 text-accent-primary font-medium hover:bg-accent-primary/15"
                     >
