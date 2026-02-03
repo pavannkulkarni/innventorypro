@@ -6,8 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/hooks/useCurrency";
-import { Search, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, X, ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
 import { format } from "date-fns";
+import { SaleReturnDialog } from "./SaleReturnDialog";
 
 interface SalesHistoryDialogProps {
   open: boolean;
@@ -42,6 +43,8 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [selectedSaleForReturn, setSelectedSaleForReturn] = useState<Sale | null>(null);
   const { formatPrice } = useCurrency();
 
   useEffect(() => {
@@ -245,7 +248,22 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
                       
                       {isExpanded && sale.items && sale.items.length > 0 && (
                         <div className="px-4 pb-4 pt-2 border-t border-divider bg-bg-200">
-                          <p className="text-xs text-text-secondary mb-2 font-medium">Items Sold:</p>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs text-text-secondary font-medium">Items Sold:</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSaleForReturn(sale);
+                                setReturnDialogOpen(true);
+                              }}
+                              className="h-7 text-xs gap-1 text-warning hover:text-warning hover:bg-warning/10"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              Return / Refund
+                            </Button>
+                          </div>
                           <div className="space-y-2">
                             {sale.items.map((item) => {
                               const displayName = item.variant_name 
@@ -273,6 +291,20 @@ export function SalesHistoryDialog({ open, onClose, userId }: SalesHistoryDialog
           </ScrollArea>
         </div>
       </DialogContent>
+
+      {/* Return Dialog */}
+      <SaleReturnDialog
+        open={returnDialogOpen}
+        onClose={() => {
+          setReturnDialogOpen(false);
+          setSelectedSaleForReturn(null);
+        }}
+        sale={selectedSaleForReturn}
+        userId={userId}
+        onComplete={() => {
+          fetchSales();
+        }}
+      />
     </Dialog>
   );
 }
