@@ -604,6 +604,133 @@ export type Database = {
           },
         ]
       }
+      sale_return_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          refund_amount: number
+          sale_item_id: string
+          sale_return_id: string
+          unit_price: number
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity: number
+          refund_amount: number
+          sale_item_id: string
+          sale_return_id: string
+          unit_price: number
+          updated_at?: string
+          user_id: string
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          refund_amount?: number
+          sale_item_id?: string
+          sale_return_id?: string
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_return_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_return_items_sale_item_id_fkey"
+            columns: ["sale_item_id"]
+            isOneToOne: false
+            referencedRelation: "sale_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_return_items_sale_return_id_fkey"
+            columns: ["sale_return_id"]
+            isOneToOne: false
+            referencedRelation: "sale_returns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_return_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_returns: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          processed_by: string | null
+          reason: string | null
+          refund_method: string
+          return_date: string
+          return_number: string
+          sale_id: string
+          status: string
+          total_refund: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          refund_method?: string
+          return_date?: string
+          return_number: string
+          sale_id: string
+          status?: string
+          total_refund?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          refund_method?: string
+          return_date?: string
+          return_number?: string
+          sale_id?: string
+          status?: string
+          total_refund?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_returns_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales: {
         Row: {
           cashier_name: string | null
@@ -824,6 +951,7 @@ export type Database = {
     Functions: {
       check_low_stock_notifications: { Args: never; Returns: undefined }
       generate_po_number: { Args: never; Returns: string }
+      generate_return_number: { Args: never; Returns: string }
       generate_sale_number: { Args: never; Returns: string }
     }
     Enums: {
