@@ -13,6 +13,7 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo.svg";
+import { Helmet } from "react-helmet-async";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -242,6 +243,15 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bg-200 via-bg-100 to-surface-100 p-4">
+      <Helmet>
+        <title>Sign in to InnoventoryPro — Inventory & POS</title>
+        <meta name="description" content="Sign in or create an InnoventoryPro account to manage multi-warehouse inventory, purchase orders, and point-of-sale." />
+        <link rel="canonical" href="https://innventorypro.lovable.app/auth" />
+        <meta property="og:title" content="Sign in to InnoventoryPro" />
+        <meta property="og:description" content="Access your inventory dashboard and POS." />
+        <meta property="og:url" content="https://innventorypro.lovable.app/auth" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 flex flex-col items-center">
           <div className="w-16 h-16 flex items-center justify-center mb-2">

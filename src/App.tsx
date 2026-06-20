@@ -105,6 +105,7 @@ const App = () => {
                                   const theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
                                   document.documentElement.classList.toggle('dark');
                                 }}
+                                aria-label="Toggle theme"
                                 className="h-9 w-9 rounded-lg hover:bg-muted-100 flex items-center justify-center transition-colors"
                               >
                                 <svg className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +119,7 @@ const App = () => {
                               <div className="h-6 w-px bg-divider" />
 
                               <div className="relative group">
-                                <button className="h-9 w-9 rounded-full bg-accent-primary/10 flex items-center justify-center hover:bg-accent-primary/20 transition-colors">
+                                <button aria-label="User profile menu" className="h-9 w-9 rounded-full bg-accent-primary/10 flex items-center justify-center hover:bg-accent-primary/20 transition-colors">
                                   <svg className="h-4 w-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                   </svg>
