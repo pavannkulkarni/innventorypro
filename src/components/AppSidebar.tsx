@@ -64,7 +64,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-divider bg-surface-200">
       <SidebarHeader className="h-16 px-6 border-b border-divider flex items-center">
         <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <img src={logo} alt="InnoventoryPro Logo" className="h-10 w-10" />
+          <img src={logo} alt="InnoventoryPro inventory management" className="h-10 w-10" />
           {open && (
             <div>
               <h2 className="text-lg font-semibold text-text-primary">InnoventoryPro</h2>
