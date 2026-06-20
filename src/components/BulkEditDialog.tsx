@@ -89,7 +89,7 @@ export function BulkEditDialog({
       for (const update of updates) {
         if (!update) continue;
 
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from(tableName)
           .update({ [field]: update.value })
           .eq("id", update.id);
