@@ -1,0 +1,10 @@
+# InnoventoryPro
+
+> Professional inventory management platform with multi-warehouse stock tracking, barcode scanning, purchase orders, POS sales, and real-time analytics for growing businesses.
+
+InnoventoryPro helps warehouse managers, inventory analysts, procurement officers, and store operators keep stock accurate across locations. It includes a built-in point-of-sale, supplier and purchase order workflows, low-stock alerts, and exportable reports.
+
+## Pages
+
+- [Home](/): Product overview, features, and pricing for InnoventoryPro.
+- [Sign in](/auth): Create an account or sign in to access the application.
