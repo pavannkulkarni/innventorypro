@@ -189,16 +189,16 @@ export default function InventoryView() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead className="text-right">Stock In</TableHead>
-                <TableHead className="text-right">Stock Out</TableHead>
-                <TableHead className="text-right">Qty on Hand</TableHead>
-                <TableHead className="text-right">Cost/Unit</TableHead>
-                <TableHead className="text-right">Inventory Value</TableHead>
-                <TableHead className="text-right">Reorder Level</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="whitespace-nowrap">Product</TableHead>
+                <TableHead className="whitespace-nowrap">Variant</TableHead>
+                <TableHead className="whitespace-nowrap">Warehouse</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Stock In</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Stock Out</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Qty on Hand</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Cost/Unit</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Inventory Value</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Reorder Level</TableHead>
+                <TableHead className="whitespace-nowrap">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
